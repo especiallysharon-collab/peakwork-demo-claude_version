@@ -1,0 +1,1793 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="PeakWork interactive prototype · MC6378 Data Storytelling · synthetic demo data">
+</head>
+<body>
+<title>PeakWork</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: deck-matched app shell — lime-glow paper ground, black pill nav, white cards, dark measure chips */
+:root{
+  --bg:#F5F6EC; --glow:rgba(212,232,36,.30); --card:#FFFFFF; --card2:#F1F4E1; --line:#E1E4D3; --line2:#DCE3C0;
+  --ink:#0C0D07; --muted:#5B5E52; --faint:#8D9180; --green:#31643B; --deep:#1E3A22; --lime:#D4E824; --lime-soft:#E9F0BE;
+  --amber:#C9861B; --amber-soft:#FBEFD6; --danger:#A8432C; --danger-soft:#F8E3DC;
+  --protect:#31643B; --protect-soft:#E3EEDF; --refuel:#B9CB10; --refuel-soft:#F1F6C4; --usewell:#0C0D07; --usewell-soft:#E6E7E0;
+  --chip-bg:linear-gradient(100deg,#1E3A22,#0C0D07); --chip-fg:#FFFFFF;
+  --nav:#0C0D07; --nav-fg:#F5F6EC;
+  --shadow:0 1px 2px rgba(30,58,34,.06),0 8px 24px rgba(30,58,34,.06);
+  --f-display:"Poppins","Figtree",Arial,sans-serif; --f-body:"Figtree",Arial,"Helvetica Neue",sans-serif;
+  --r:18px; --r-sm:12px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#11130D; --glow:rgba(212,232,36,.10); --card:#1A1D14; --card2:#20251A; --line:#2D3324; --line2:#3A4230;
+  --ink:#EEF2DC; --muted:#B4B9A2; --faint:#8D9180; --green:#9BCB7A; --deep:#CFE6A8; --lime:#D4E824; --lime-soft:#2E3517;
+  --amber:#E8B04F; --amber-soft:#3A2E16; --danger:#F09A84; --danger-soft:#3B211B;
+  --protect:#9BCB7A; --protect-soft:#223321; --refuel:#D4E824; --refuel-soft:#2E3517; --usewell:#EEF2DC; --usewell-soft:#2A2D24;
+  --chip-bg:linear-gradient(100deg,#2B4A2F,#161A10); --nav:#000000; --nav-fg:#EEF2DC; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#11130D; --glow:rgba(212,232,36,.10); --card:#1A1D14; --card2:#20251A; --line:#2D3324; --line2:#3A4230;
+  --ink:#EEF2DC; --muted:#B4B9A2; --faint:#8D9180; --green:#9BCB7A; --deep:#CFE6A8; --lime:#D4E824; --lime-soft:#2E3517;
+  --amber:#E8B04F; --amber-soft:#3A2E16; --danger:#F09A84; --danger-soft:#3B211B;
+  --protect:#9BCB7A; --protect-soft:#223321; --refuel:#D4E824; --refuel-soft:#2E3517; --usewell:#EEF2DC; --usewell-soft:#2A2D24;
+  --chip-bg:linear-gradient(100deg,#2B4A2F,#161A10); --nav:#000000; --nav-fg:#EEF2DC; color-scheme:dark}
+
+*{box-sizing:border-box}
+html,body{min-height:100%}
+body{margin:0;background:var(--bg);background-image:radial-gradient(1200px 380px at 50% -120px,var(--glow),transparent 70%);background-attachment:fixed;color:var(--ink);font:16px/1.5 var(--f-body);-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--bg)}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--lime);outline-offset:2px;border-radius:8px}
+h1,h2,h3{font-family:var(--f-body);font-weight:700;margin:0;text-wrap:balance;letter-spacing:-.01em}
+h1{font-size:clamp(24px,3.2vw,32px);line-height:1.15}
+h2{font-size:21px;line-height:1.25}
+h3{font-size:17px;line-height:1.3}
+p{margin:0}
+.num{font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)} .faint{color:var(--faint)} .small{font-size:14px} .xs{font-size:12.5px}
+.eyebrow{font-size:11.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--green);display:flex;align-items:center;gap:7px}
+.eyebrow::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor;flex:none}
+.eyebrow.plain::before{display:none}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* top bar */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;display:flex;align-items:center;gap:12px;padding-block:10px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.logo{background:none;border:0;padding:0;cursor:pointer;display:flex;align-items:center;gap:8px;text-decoration:none;color:var(--ink);font-family:var(--f-display);font-weight:800;font-size:21px;letter-spacing:-.02em;flex:none}
+.logo svg{width:44px;height:auto}
+.logo b{color:var(--green);font-weight:800}
+.badge-synth{font-size:11.5px;font-weight:600;padding:3px 9px;border-radius:999px;background:var(--lime-soft);color:var(--deep);white-space:nowrap}
+.top .grow{flex:1}
+.clockbtn{display:flex;align-items:center;gap:8px;min-height:44px;padding:6px 14px;border-radius:999px;border:1px solid var(--line2);background:var(--card);font-weight:600;font-size:14px}
+.clockbtn .t{font-family:var(--f-display);font-size:15px}
+.clockbtn .live{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px var(--lime-soft)}
+.clockbtn .live.off{background:var(--faint);box-shadow:none}
+.avatar{width:44px;height:44px;border-radius:50%;border:1px solid var(--line2);background:var(--deep);color:var(--lime);font-weight:700;display:grid;place-items:center;flex:none}
+.rolepill{font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px;background:var(--ink);color:var(--bg)}
+
+/* shell */
+.shell{display:grid;grid-template-columns:232px minmax(0,1fr);gap:28px;max-width:1240px;margin:0 auto;padding-block:24px 40px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.side{position:sticky;top:84px;align-self:start;display:flex;flex-direction:column;gap:6px;background:var(--nav);border-radius:24px;padding:10px}
+.side .lbl{color:var(--faint);font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;padding:10px 12px 4px}
+.navbtn{display:flex;align-items:center;gap:10px;min-height:46px;padding:8px 14px;border-radius:999px;border:0;background:transparent;color:var(--nav-fg);font-weight:600;text-align:left;text-decoration:none;font-size:15px}
+.navbtn svg{width:20px;height:20px;flex:none}
+.navbtn:hover{background:rgba(255,255,255,.07)}
+.navbtn[aria-current="page"]{background:var(--lime);color:#0C0D07}
+.navbtn .k{margin-left:auto;font-size:11px;opacity:.6}
+.side .sep{height:1px;background:rgba(255,255,255,.1);margin:6px 8px}
+main{min-width:0;outline:none}
+main:focus-visible{outline:none}
+.bottom{display:none}
+.foot{max-width:1240px;margin:0 auto;justify-content:center;padding-block:6px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.foot .dot{width:7px;height:7px;border-radius:50%;background:var(--green)}
+
+@media (max-width:900px){
+  .shell{grid-template-columns:minmax(0,1fr);padding-block:16px 24px}
+  .side{display:none}
+  .bottom{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:0;right:0;bottom:0;z-index:25;background:var(--nav);padding:6px;padding-left:max(6px,env(safe-area-inset-left,0px));padding-right:max(6px,env(safe-area-inset-right,0px));padding-bottom:calc(6px + env(safe-area-inset-bottom,0px));gap:2px}
+  .bottom .navbtn{flex-direction:column;gap:2px;min-height:54px;padding:6px 2px;border-radius:16px;font-size:11.5px;justify-content:center;text-align:center}
+  .bottom .navbtn .k{display:none}
+  .foot{padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+  .badge-synth{display:none}
+  .logo span.word{display:none}
+}
+@media (max-width:420px){ .clockbtn .lbl{display:none} }
+
+/* page */
+.page{display:flex;flex-direction:column;gap:20px}
+.phead{display:flex;flex-direction:column;gap:8px}
+.phead .sub{color:var(--muted);max-width:62ch}
+.pillar-head{display:flex;gap:16px;align-items:center;padding:20px 22px;border-radius:var(--r);background:linear-gradient(120deg,var(--card) 0%,var(--card2) 100%);border:1px solid var(--line)}
+.pillar-head .pic{width:56px;height:56px;border-radius:16px;display:grid;place-items:center;flex:none}
+.pillar-head .pic svg{width:28px;height:28px}
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media (max-width:1100px){.g4{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:760px){.g2,.g3,.g4{grid-template-columns:minmax(0,1fr)}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:20px;box-shadow:var(--shadow);min-width:0;display:flex;flex-direction:column;gap:12px}
+.card.soft{background:linear-gradient(160deg,var(--card) 30%,var(--lime-soft) 140%)}
+.card.flat{box-shadow:none;background:var(--card2)}
+.card .hd{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.row.between{justify-content:space-between}
+.stack{display:flex;flex-direction:column;gap:8px}
+.divider{height:1px;background:var(--line);margin:4px 0}
+
+/* measure chip — deck motif */
+.mchip{align-self:flex-start;display:inline-flex;align-items:center;gap:10px;padding:6px 14px 6px 6px;border-radius:999px;background:var(--chip-bg);color:var(--chip-fg);font-size:13px;font-weight:600;line-height:1.2;max-width:100%}
+.mchip .n{width:24px;height:24px;border-radius:50%;background:var(--lime);color:#0C0D07;display:grid;place-items:center;font-weight:800;font-size:12.5px;flex:none}
+.mchip small{display:block;font-size:10.5px;font-weight:500;opacity:.7}
+.leads{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 14px;border-radius:999px;background:linear-gradient(90deg,var(--card2),var(--lime-soft))}
+.leads .k{font-size:11px;font-weight:700;letter-spacing:.09em;color:var(--green);text-transform:uppercase}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:10px 18px;border-radius:999px;border:1px solid transparent;font-weight:700;font-size:15px;text-decoration:none;white-space:nowrap}
+.btn.primary{background:var(--ink);color:var(--bg)}
+.btn.lime{background:var(--lime);color:#0C0D07}
+.btn.ghost{background:transparent;border-color:var(--line2);color:var(--ink)}
+.btn.quiet{background:var(--card2);color:var(--ink)}
+.btn.danger{background:transparent;border-color:var(--danger);color:var(--danger)}
+.btn.sm{min-height:36px;padding:6px 14px;font-size:13.5px}
+.btn:disabled,.btn[aria-disabled="true"]{opacity:.45;cursor:not-allowed}
+.btn:not(:disabled):hover{filter:brightness(1.06)}
+.linkbtn{background:none;border:0;padding:0;color:var(--green);font-weight:700;text-decoration:underline;text-underline-offset:3px;min-height:auto}
+
+/* tags & status */
+.tag{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;padding:3px 10px;border-radius:999px;background:var(--card2);color:var(--muted);white-space:nowrap}
+.tag.ok{background:var(--protect-soft);color:var(--green)}
+.tag.warn{background:var(--amber-soft);color:var(--amber)}
+.tag.bad{background:var(--danger-soft);color:var(--danger)}
+.tag.lime{background:var(--lime);color:#0C0D07}
+.tag.ink{background:var(--ink);color:var(--bg)}
+.ptag{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;padding:3px 10px 3px 6px;border-radius:999px}
+.ptag svg{width:15px;height:15px}
+.ptag.protect{background:var(--protect-soft);color:var(--protect)}
+.ptag.refuel{background:var(--refuel-soft);color:var(--ink)}
+.ptag.use_well{background:var(--usewell-soft);color:var(--usewell)}
+
+/* battery */
+.battery{display:flex;align-items:center;gap:4px}
+.battery .body{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;padding:6px;border:4px solid var(--ink);border-radius:14px;background:var(--card)}
+.battery .cell{border-radius:5px;background:var(--line)}
+.battery .cap{width:8px;height:40%;background:var(--ink);border-radius:0 4px 4px 0}
+.battery .cell.on{background:var(--lime)}
+.battery.low .cell.on{background:var(--amber)}
+.battery.empty .body{border-style:dashed;border-color:var(--faint)}
+.battery.empty .cap{background:var(--faint)}
+.battery.lg .body{width:min(320px,70vw);height:110px}
+.battery.md .body{width:132px;height:52px;border-width:3px;padding:4px;gap:3px;border-radius:10px}
+.battery.sm .body{width:44px;height:20px;border-width:2px;padding:2px;gap:2px;border-radius:5px}
+.battery.sm .cell{border-radius:2px}
+.battery .q{display:grid;place-items:center;grid-column:1/-1;font-family:var(--f-display);font-weight:800;font-size:40px;color:var(--faint)}
+.battery.charging .cell.next{animation:charge 1.1s ease-in-out infinite}
+@keyframes charge{0%,100%{background:var(--line)}50%{background:var(--lime)}}
+@media (prefers-reduced-motion:reduce){.battery.charging .cell.next{animation:none}}
+
+.hero{display:grid;grid-template-columns:auto minmax(0,1fr);gap:28px;align-items:center;padding:26px;border-radius:24px;background:linear-gradient(135deg,var(--card) 35%,var(--lime-soft));border:1px solid var(--line);box-shadow:var(--shadow)}
+.hero .state{font-family:var(--f-display);font-weight:800;font-size:clamp(28px,4vw,40px);letter-spacing:-.02em;line-height:1.05}
+@media (max-width:760px){.hero{grid-template-columns:minmax(0,1fr);gap:18px;padding:20px}}
+
+.sugg{border-radius:var(--r);padding:18px 20px;display:flex;gap:16px;align-items:center;flex-wrap:wrap;border:1px solid var(--line);background:var(--card)}
+.sugg .ic{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;flex:none}
+.sugg .ic svg{width:24px;height:24px}
+.sugg .tx{flex:1;min-width:200px}
+.bg-protect{background:var(--protect);color:#fff} .bg-refuel{background:var(--lime);color:#0C0D07} .bg-use_well{background:#0C0D07;color:var(--lime)}
+
+.pcard{display:flex;flex-direction:column;gap:10px;text-align:left;padding:18px;border-radius:var(--r);border:1px solid var(--line);background:linear-gradient(170deg,var(--card) 40%,var(--card2));box-shadow:var(--shadow);color:var(--ink)}
+.pcard:hover{border-color:var(--green)}
+.pcard .top2{display:flex;justify-content:space-between;align-items:center}
+
+/* list rows */
+.list{display:flex;flex-direction:column}
+.li{display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid var(--line);min-width:0}
+.li:first-child{border-top:0}
+.li .tm{font-variant-numeric:tabular-nums;font-weight:700;font-size:14px;width:104px;flex:none}
+.li .bd{flex:1;min-width:0}
+.li .bd b{display:block}
+
+/* forms */
+label.f{display:flex;flex-direction:column;gap:6px;font-weight:600;font-size:14px}
+input[type=text],input[type=number],select,textarea{min-height:44px;padding:8px 12px;border-radius:12px;border:1px solid var(--line2);background:var(--card);font-size:16px;width:100%}
+textarea{min-height:80px;resize:vertical}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button,.seg label{min-height:40px;padding:6px 14px;border-radius:999px;border:1px solid var(--line2);background:var(--card);font-weight:600;font-size:14px;display:inline-flex;align-items:center;gap:6px}
+.seg [aria-pressed="true"],.seg input:checked+span{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.seg label{position:relative;cursor:pointer}
+.seg label input{position:absolute;opacity:0;pointer-events:none}
+.seg label:has(input:checked){background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.seg label:has(input:focus-visible){outline:3px solid var(--lime)}
+.err{color:var(--danger);font-size:13.5px;font-weight:600}
+.switch{display:inline-flex;align-items:center;gap:10px;font-weight:600;font-size:14px;cursor:pointer}
+.switch input{appearance:none;width:44px;height:26px;border-radius:999px;background:var(--line2);position:relative;transition:background .15s;flex:none;cursor:pointer}
+.switch input::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left .15s;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+.switch input:checked{background:var(--green)}
+.switch input:checked::after{left:21px}
+
+/* rating picker */
+.rate{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+.rate button{display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px 4px;border-radius:14px;border:1px solid var(--line2);background:var(--card);font-weight:700;font-size:13px}
+.rate button[aria-pressed="true"]{border:2px solid var(--ink);background:var(--lime-soft)}
+
+/* banner */
+#banner-root{position:sticky;top:calc(65px + env(safe-area-inset-top,0px));z-index:19}
+.nudge{max-width:1240px;margin:10px auto 0;display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:12px 16px;border-radius:18px;background:var(--chip-bg);color:#fff;box-shadow:0 12px 30px rgba(12,13,7,.25);width:calc(100% - 2*max(16px,env(safe-area-inset-left,0px)))}
+.nudge .ic{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;flex:none}
+.nudge .tx{flex:1;min-width:200px}
+.nudge .tx small{display:block;opacity:.75;font-size:12.5px}
+.nudge .btn.ghost{border-color:rgba(255,255,255,.3);color:#fff}
+.nudge .linkbtn{color:var(--lime)}
+
+/* modal */
+.scrim{position:fixed;inset:0;z-index:50;background:rgba(12,13,7,.45);display:grid;place-items:center;padding:16px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.modal{width:min(640px,100%);max-height:calc(100vh - 32px);overflow:auto;background:var(--card);border-radius:22px;padding:24px;box-shadow:0 30px 80px rgba(0,0,0,.3);display:flex;flex-direction:column;gap:16px}
+.modal.wide{width:min(860px,100%)}
+.modal .mh{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.xbtn{width:44px;height:44px;border-radius:50%;border:1px solid var(--line2);background:var(--card);font-size:20px;line-height:1;flex:none}
+
+/* fullscreen activity */
+.activity{position:fixed;inset:0;z-index:60;background:radial-gradient(900px 500px at 50% 0%,rgba(212,232,36,.25),transparent 70%),#0C0D07;color:#F5F6EC;display:flex;align-items:center;justify-content:center;padding:24px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));overflow:auto}
+.activity .in{width:min(560px,100%);display:flex;flex-direction:column;align-items:center;gap:18px;text-align:center}
+.activity .count{font-family:var(--f-display);font-weight:800;font-size:clamp(64px,14vw,112px);line-height:1;font-variant-numeric:tabular-nums;color:var(--lime)}
+.activity .battery .body{background:#1A1D14;border-color:#F5F6EC;width:200px;height:76px}
+.activity .battery .cap{background:#F5F6EC}
+.activity .battery .cell{background:#2D3324}
+.activity .battery .cell.on{background:var(--lime)}
+.activity .note{font-size:13px;opacity:.75;max-width:48ch}
+.activity .alts{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.activity .alts button{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:999px;padding:6px 12px;font-size:13px;min-height:36px}
+.activity .alts button[aria-pressed="true"]{background:var(--lime);color:#0C0D07}
+
+/* toast */
+#toast-root{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(90px + env(safe-area-inset-bottom,0px));z-index:70;display:flex;flex-direction:column;gap:8px;align-items:center;width:min(520px,calc(100% - 32px))}
+.toast{display:flex;align-items:center;gap:12px;padding:10px 16px 10px 10px;border-radius:999px;background:var(--ink);color:var(--bg);font-weight:600;font-size:14px;box-shadow:0 10px 30px rgba(0,0,0,.25);animation:tin .25s ease-out}
+.toast.bad{background:var(--danger);color:#fff}
+@keyframes tin{from{transform:translateY(10px);opacity:0}}
+
+/* chart */
+.chart{width:100%;height:auto;display:block;overflow:visible}
+.chart text{fill:var(--muted);font-size:11px;font-family:var(--f-body)}
+.chart .grid line{stroke:var(--line)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--muted)}
+.legend i{display:inline-block;width:18px;height:3px;border-radius:2px;vertical-align:middle;margin-right:6px}
+
+/* calendar */
+.daycal{position:relative;border-left:1px solid var(--line);margin-left:46px}
+.daycal .hr{position:absolute;left:-46px;right:0;border-top:1px dashed var(--line);font-size:11px;color:var(--faint)}
+.daycal .hr span{position:absolute;left:0;top:-8px;width:40px;text-align:right}
+.daycal .blk{position:absolute;left:8px;right:4px;border-radius:10px;padding:4px 10px;font-size:12.5px;font-weight:600;overflow:hidden;display:flex;gap:8px;align-items:flex-start;border:1px solid var(--line2);background:var(--card2)}
+.daycal .blk.deep{background:#0C0D07;color:var(--lime);border-color:#0C0D07}
+.daycal .blk.light{background:var(--lime-soft);color:var(--deep)}
+.daycal .blk.collab{background:var(--protect-soft);color:var(--green)}
+.daycal .blk.meeting{background:var(--usewell-soft)}
+.daycal .blk.lunch{background:repeating-linear-gradient(135deg,var(--card2) 0 6px,var(--card) 6px 12px)}
+.daycal .blk.booking{background:var(--refuel-soft);border-color:var(--refuel);color:var(--ink)}
+.daycal .blk.preview{outline:2px dashed var(--green);outline-offset:-2px}
+.daycal .core{position:absolute;left:0;width:5px;background:var(--lime);border-radius:3px}
+.daycal .now{position:absolute;left:-6px;right:0;border-top:2px solid var(--danger);z-index:3}
+.daycal .now::before{content:"";position:absolute;left:-4px;top:-5px;width:8px;height:8px;border-radius:50%;background:var(--danger)}
+
+.week{display:grid;grid-template-columns:44px repeat(5,minmax(0,1fr));gap:4px;font-size:12px}
+.week .h{font-weight:700;text-align:center;padding:4px 0}
+.week .t{color:var(--faint);text-align:right;padding-right:4px;font-variant-numeric:tabular-nums}
+.week .c{height:18px;border-radius:4px;background:var(--card2)}
+.week .c.core{background:var(--lime)}
+.week .c.off{background:transparent;border:1px dashed var(--line)}
+.week .h small{display:block;font-weight:600;color:var(--muted)}
+
+/* metric */
+.metric{display:flex;flex-direction:column;gap:6px}
+.metric .v{font-family:var(--f-display);font-weight:800;font-size:30px;letter-spacing:-.02em;line-height:1.05}
+.metric .d{font-weight:700;font-size:14px}
+.up{color:var(--green)} .down{color:var(--danger)}
+.tbl{width:100%;border-collapse:collapse;font-size:14px}
+.tbl th,.tbl td{text-align:left;padding:9px 8px;border-top:1px solid var(--line);vertical-align:top}
+.tbl th{font-size:12px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em;border-top:0}
+.tblwrap{overflow-x:auto}
+.bar{height:8px;border-radius:999px;background:var(--card2);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--green);border-radius:999px}
+.heat{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px}
+.heat div{border-radius:12px;padding:10px 6px;text-align:center;font-weight:700}
+.heat small{display:block;font-weight:600;font-size:11.5px}
+details.fold summary{cursor:pointer;font-weight:700;color:var(--muted);min-height:36px;display:flex;align-items:center}
+.rhythm-card{border-radius:20px;padding:20px;background:linear-gradient(140deg,#0C0D07,#1E3A22);color:#F5F6EC;display:flex;flex-direction:column;gap:12px}
+.rhythm-card dl{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:0;font-size:14px}
+.rhythm-card dt{opacity:.7}
+.rhythm-card dd{margin:0;font-weight:700}
+.readonly-bar{position:fixed;top:0;left:0;right:0;z-index:80;background:var(--amber);color:#0C0D07;padding:10px 16px;font-weight:700;display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap}
+.skeleton{padding:40px;color:var(--muted)}
+.pathlist{counter-reset:p;display:flex;flex-direction:column;gap:6px;padding:0;margin:0;list-style:none}
+.pathlist li{display:flex;gap:10px;align-items:center;padding:8px 10px;border-radius:12px;background:var(--card2)}
+.pathlist li::before{counter-increment:p;content:counter(p);width:24px;height:24px;border-radius:50%;background:var(--ink);color:var(--bg);display:grid;place-items:center;font-weight:800;font-size:12px;flex:none}
+.pathlist .tx{flex:1;min-width:0;font-size:13.5px}
+.g-plan{grid-template-columns:minmax(0,1.35fr) minmax(0,1fr)}
+@media (max-width:900px){.g-plan{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:520px){.li{flex-wrap:wrap}.li .tm{width:auto;min-width:88px}.li .bd{flex-basis:60%}}
+
+</style>
+<div id="app" aria-live="off">
+  <header class="top" id="top"></header>
+  <div id="banner-root"></div>
+  <div class="shell">
+    <nav class="side" id="side" aria-label="Main"></nav>
+    <main id="main" tabindex="-1"><div class="skeleton" aria-busy="true">Loading your battery…</div></main>
+  </div>
+  <nav class="bottom" id="bottom" aria-label="Main"></nav>
+  <footer class="foot"><span class="dot"></span> Interactive demo · Saved locally · <b>Synthetic demo data</b></footer>
+</div>
+<div id="modal-root"></div>
+<div id="overlay-root"></div>
+<div id="toast-root" role="status" aria-live="polite"></div>
+<script>
+"use strict";
+/* ================= measures.ts (single source of measure naming) ================= */
+const MEASURES = [
+  { id: 1, pillar: "protect",  name: "Micro-breaks + screen reminders", app: "Break nudge" },
+  { id: 2, pillar: "protect",  name: "Healthy eating",                  app: "Meal planner" },
+  { id: 3, pillar: "refuel",   name: "Micro-move every 30 min",         app: "Move timer" },
+  { id: 4, pillar: "refuel",   name: "Exercise in work hours",          app: "Class booking" },
+  { id: 5, pillar: "use_well", name: "Peak scheduling",                 app: "Energy calendar" },
+  { id: 6, pillar: "use_well", name: "Core hours",                      app: "Team core hours" },
+  { id: 7, pillar: "use_well", name: "Structured flex",                 app: "Flex planner" },
+];
+const M = id => MEASURES.find(m => m.id === id);
+const PILLARS = {
+  protect:  { key: "protect",  name: "Protect energy",  short: "Protect",  trait: "They care about health",    line: "Stop the drain", route: "/protect" },
+  refuel:   { key: "refuel",   name: "Refuel energy",   short: "Refuel",   trait: "They love exercise",        line: "Recharge on purpose", route: "/refuel" },
+  use_well: { key: "use_well", name: "Use energy well", short: "Use well", trait: "They want control of time", line: "Spend it where it counts", route: "/use-well" },
+};
+const SCHEMA = 3, KEY = "peakwork.demo.v3", BAK = "peakwork.demo.v3.backup", CLOCK_KEY = "peakwork.clock.v3", EV_KEY = "peakwork.events.v3";
+const TODAY = "2026-10-20";
+const DAY_START_SEC = 9 * 3600;
+const TPS = [570, 690, 750, 810, 900, 1020]; // check-in time points 09:30 11:30 12:30 13:30 15:00 17:00
+const BASELINE = ["2026-10-05", "2026-10-06", "2026-10-07", "2026-10-08", "2026-10-09"];
+const COMPARISON = ["2026-10-12", "2026-10-13", "2026-10-14", "2026-10-15", "2026-10-16"];
+const HISTORY_DATES = [...BASELINE, ...COMPARISON, "2026-10-19"];
+const EMPLOYEES = [
+  ["mei", "Mei"], ["arjun", "Arjun"], ["lina", "Lina"], ["daniel", "Daniel"], ["aisha", "Aisha"],
+  ["jun", "Jun"], ["sara", "Sara"], ["kai", "Kai"], ["noor", "Noor"],
+].map(([id, name]) => ({ id, name, team: "Product Team" }));
+const RATING_LABEL = { 1: "Drained", 2: "Low", 3: "Okay", 4: "Good", 5: "At my best" };
+const CHECKIN_TAGS = ["Slept late", "Back-to-back", "Hungry", "Focused", "Calm", "Wired", "Stiff"];
+
+const TEMPLATES = [
+  { id: "eye-20", type: "eye_break", title: "20-20-20 eye rest", sec: 20, positions: ["seated", "standing"], space: "at_desk", equipment: [], feeling: ["eyes", "calm"], incompatible: [], status: "published",
+    steps: "Look at something about 6 metres (20 feet) away for 20 seconds. Blink slowly.", needs: "A window or a far wall", source: "HSE, Working with display screen equipment" },
+  { id: "screen-pause", type: "eye_break", title: "Screen pause: palms over eyes", sec: 60, positions: ["seated", "standing"], space: "at_desk", equipment: [], feeling: ["calm"], incompatible: [], status: "published",
+    steps: "Close your eyes, rest your palms lightly over them and breathe slowly.", needs: "Nothing", source: "HSE, Work routine and breaks" },
+  { id: "ankle", type: "micro_move", title: "Seated ankle movement", sec: 60, positions: ["seated"], space: "at_desk", equipment: [], feeling: ["gentle", "circulation"], incompatible: [], status: "published",
+    steps: "Sit tall. Lift your toes, then your heels, 10 times. Circle each ankle 5 times each way.", needs: "Your chair", source: "NHS, Sitting exercises" },
+  { id: "shoulder", type: "micro_move", title: "Seated shoulder rolls", sec: 60, positions: ["seated"], space: "at_desk", equipment: [], feeling: ["gentle", "posture"], incompatible: ["shoulder"], status: "published",
+    steps: "Roll your shoulders back slowly 8 times, then forward 8 times.", needs: "Your chair", source: "NHS, Sitting exercises" },
+  { id: "walk", type: "micro_move", title: "A short walk near your desk", sec: 120, positions: ["standing"], space: "near_desk", equipment: [], feeling: ["energising"], incompatible: ["knee"], status: "published",
+    steps: "Stand up, walk to the window or the water point and back at an easy pace.", needs: "A clear path", source: "HSE, Work routine and breaks" },
+  { id: "side-stretch", type: "micro_move", title: "Standing side stretch", sec: 60, positions: ["standing"], space: "at_desk", equipment: [], feeling: ["energising", "posture"], incompatible: ["back"], status: "published",
+    steps: "Stand, reach one arm overhead and lean gently to the side. Hold 10 seconds, then switch.", needs: "Space beside your desk", source: "NHS, Sitting exercises" },
+  { id: "chair-squat", type: "micro_move", title: "Chair sit-to-stand", sec: 60, positions: ["standing"], space: "at_desk", equipment: ["stable_chair"], feeling: ["energising"], incompatible: ["knee"], status: "draft",
+    steps: "Draft content, not yet reviewed.", needs: "A stable chair", source: "" },
+];
+const REM = {
+  break_nudge: { pillar: "protect", measure: 1, label: "Break nudge", types: ["eye_break"], intervals: [0, 20, 40, 60], logged: "break" },
+  move_timer:  { pillar: "refuel",  measure: 3, label: "Move timer",  types: ["micro_move"], intervals: [0, 30, 60, 120], logged: "move" },
+};
+
+/* ================= utils ================= */
+const $ = (s, r = document) => r.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const pad = n => String(n).padStart(2, "0");
+const hm = min => `${pad(Math.floor(min / 60))}:${pad(Math.round(min % 60))}`;
+const hms = sec => `${pad(Math.floor(sec / 3600))}:${pad(Math.floor(sec / 60) % 60)}`;
+const rng = seed => () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const mean = a => a.length ? a.reduce((x, y) => x + y, 0) / a.length : null;
+const r1 = v => v == null ? null : Math.round(v * 10) / 10;
+const uid = p => p + "_" + Math.random().toString(36).slice(2, 9);
+const overlap = (a0, a1, b0, b1) => a0 < b1 && b0 < a1;
+const dayName = d => new Date(d + "T00:00:00+08:00").toLocaleDateString("en-SG", { weekday: "short", day: "numeric", month: "short", timeZone: "Asia/Singapore" });
+const weekdayIdx = d => new Date(d + "T12:00:00+08:00").getUTCDay(); // 1=Mon
+class BizErr extends Error { constructor(code, msg, extra) { super(msg); this.code = code; this.extra = extra; } }
+
+/* ================= seed ================= */
+function seed() {
+  const S = {
+    schema_version: SCHEMA, today: TODAY,
+    view: { role: "employee", emp: "mei" },
+    company: { name: "Product Studio", team: "Product Team", site: "CBD Office", core: [660, 960], allowancePerQuarter: 2, subsidy: { on: false, amount: 0 }, exerciseInWork: true, weeklyExerciseMin: 90, startOptions: [450, 480, 510, 540, 570, 600, 630, 660, 690] },
+    employees: EMPLOYEES,
+    prefs: {}, energyLogs: [], habits: [], reviews: [], pulses: [], plans: {}, blocks: [], tasks: [], resources: [], bookings: [],
+    reminders: {}, rest: [], buddies: [], planApplies: [], appliedSig: {}, rhythmCards: {}, recheckAt: {},
+  };
+  const workPattern = { 1: "office", 2: "office", 3: "remote", 4: "office", 5: "remote" };
+  for (const e of EMPLOYEES) {
+    S.prefs[e.id] = {
+      onboarded: e.id !== "mei", mode: "office", site: "cbd", start: 540, paidMin: 480, lunchMin: 60, target: e.id === "mei" ? 5 : 4, focusWindow: [660, 780],
+      budget: 10, softTags: ["vegetarian", "high-fibre"], strictTags: [], followEnergy: true, pattern: workPattern,
+      activity: { positions: e.id === "mei" ? ["seated"] : ["seated", "standing"], space: "at_desk", maxSec: 120, feeling: ["gentle", "eyes"], avoid: [], equipment: ["none"] },
+      reminders: { break_nudge: e.id === "mei" ? 60 : 0, move_timer: 30 },
+      buddyOptIn: ["lina", "jun", "sara"].includes(e.id),
+    };
+    S.rhythmCards[e.id] = { rhythm: "Later rhythm", deepTime: "Morning", reply: 60, show: false, updated: null };
+  }
+  // ---------- Mei: explicit history ----------
+  const meiE = {
+    "2026-10-05": [2, 4, 4, null, 2, 3], "2026-10-06": [2, 4, null, null, 2, 3], "2026-10-07": [1, 4, 4, 3, 1, 2],
+    "2026-10-08": [2, 5, 4, null, 3, 3], "2026-10-09": [2, 4, 4, null, 2, 3], "2026-10-12": [2, 5, 4, null, 3, 3],
+    "2026-10-13": [2, 4, 5, 3, 3, 3], "2026-10-14": [3, 5, 4, null, 3, 3], "2026-10-15": [2, 4, 4, null, 1, 3],
+    "2026-10-16": [2, 4, null, null, 2, 2], "2026-10-19": [1, 4, 3, null, 1, 2],
+  };
+  for (const [d, arr] of Object.entries(meiE)) arr.forEach((r, i) => { if (r != null) S.energyLogs.push({ id: uid("e"), emp: "mei", date: d, min: TPS[i] - 5, rating: r, tags: [], source: "today", token: uid("t") }); });
+  const H = (emp, d, min, tid) => { const t = TEMPLATES.find(x => x.id === tid); S.habits.push({ id: uid("h"), emp, date: d, min, pillar: t.type === "eye_break" ? "protect" : "refuel", type: t.type, templateId: tid, title: t.type === "eye_break" ? "Screen break" : t.title, sec: t.sec, token: uid("t"), source: "seed" }); };
+  for (const d of ["2026-10-08", "2026-10-12", "2026-10-13", "2026-10-14"]) { H("mei", d, 600, "eye-20"); H("mei", d, 665, "ankle"); H("mei", d, 840, "walk"); }
+  [["2026-10-05", 1], ["2026-10-06", 1], ["2026-10-07", 2], ["2026-10-09", 1], ["2026-10-15", 1], ["2026-10-16", 1], ["2026-10-19", 1]].forEach(([d, n]) => { H("mei", d, 610, "eye-20"); if (n > 1) H("mei", d, 960, "ankle"); });
+  const meiRev = { // perf, fatigue, health, wellbeing, completed
+    "2026-10-05": [3, 4, 3, 3, 3], "2026-10-06": [3, 4, 3, 3, 3], "2026-10-07": [2, 4, 3, 2, 2], "2026-10-08": [3, 3, 3, 3, 4], "2026-10-09": [3, 4, 3, 3, 3],
+    "2026-10-12": [4, 3, 3, 4, 4], "2026-10-13": [4, 3, 4, 4, 5], "2026-10-14": [4, 2, 4, 4, 4], "2026-10-15": [3, 3, 3, 3, 4], "2026-10-16": [3, 3, 3, 3, 4], "2026-10-19": [3, 4, 3, 3, 3],
+  };
+  for (const [d, v] of Object.entries(meiRev)) { S.reviews.push({ emp: "mei", date: d, perf: v[0], fatigue: v[1], health: v[2], wellbeing: v[3], completed: v[4], planned: 5, note: "", qv: "daily_v1" }); S.plans["mei|" + d] = { target: 5, locked: true, start: 540, end: 1080, lunch: [720, 780], mode: workPattern[weekdayIdx(d)] }; }
+  S.pulses.push({ emp: "mei", week: "2026-10-05", wlb: 2, recommend: 3, qv: "weekly_v1" }, { emp: "mei", week: "2026-10-12", wlb: 3, recommend: 4, qv: "weekly_v1" });
+  for (const d of ["2026-10-07", "2026-10-13", "2026-10-15"]) S.planApplies.push({ emp: "mei", date: d });
+  // ---------- team: generated ----------
+  const base = [2.8, 3.9, 3.6, 3.2, 3.0, 2.7];
+  EMPLOYEES.filter(e => e.id !== "mei").forEach((e, k) => {
+    const R = rng(1000 + k * 77), off = (R() - .5) * .8;
+    const weakLoop = ["kai", "noor"].includes(e.id);
+    HISTORY_DATES.forEach((d, di) => {
+      const comp = COMPARISON.includes(d) || d === "2026-10-19";
+      TPS.forEach((tp, i) => { if (R() < .82) S.energyLogs.push({ id: uid("e"), emp: e.id, date: d, min: tp - 5 + Math.floor(R() * 10), rating: clamp(Math.round(base[i] + off + (comp ? .25 : 0) + (R() - .5) * 1.3), 1, 5), tags: [], source: "today", token: uid("t") }); });
+      let nH = Math.floor(R() * 3) + (comp ? 1 : 0);
+      if (weakLoop && COMPARISON.includes(d) && di % 5 > 1) nH = 0;
+      for (let j = 0; j < nH; j++) H(e.id, d, 600 + j * 120 + Math.floor(R() * 30), ["eye-20", "ankle", "walk", "shoulder"][Math.floor(R() * 4)]);
+      const target = 4;
+      S.plans[e.id + "|" + d] = { target, locked: true, start: 540, end: 1080, lunch: [720, 780], mode: workPattern[weekdayIdx(d)] };
+      if (R() < .93) S.reviews.push({ emp: e.id, date: d, perf: clamp(Math.round(3.1 + off + (comp ? .45 : 0) + (R() - .5) * 1.4), 1, 5), fatigue: clamp(Math.round(3.4 - off - (comp ? .45 : 0) + (R() - .5) * 1.4), 1, 5), health: clamp(Math.round(3.2 + (comp ? .3 : 0) + (R() - .5) * 1.2), 1, 5), wellbeing: clamp(Math.round(3.2 + off + (comp ? .3 : 0) + (R() - .5) * 1.2), 1, 5), completed: clamp(Math.round(2.6 + (comp ? .6 : 0) + R() * 1.4), 0, target), planned: target, note: "", qv: "daily_v1" });
+      if (R() < .35) S.planApplies.push({ emp: e.id, date: d });
+      if (R() < .18) S.bookings.push({ id: uid("b"), emp: e.id, resId: null, date: d, status: "completed", kind: R() < .5 ? "meal" : "class", snapshot: { title: R() < .5 ? "Canteen bowl" : "Group movement", start: 750, end: 795, price: 0 }, token: uid("t"), pillar: "refuel" });
+    });
+    S.bookings.forEach(b => { if (b.kind === "meal") b.pillar = "protect"; });
+    S.pulses.push({ emp: e.id, week: "2026-10-05", wlb: clamp(Math.round(3 + off + (R() - .5)), 1, 5), recommend: clamp(Math.round(3.2 + off + (R() - .5)), 1, 5), qv: "weekly_v1" },
+                  { emp: e.id, week: "2026-10-12", wlb: clamp(Math.round(3.4 + off + (R() - .5)), 1, 5), recommend: clamp(Math.round(3.5 + off + (R() - .5)), 1, 5), qv: "weekly_v1" });
+  });
+  // ---------- today ----------
+  for (const e of EMPLOYEES) {
+    S.plans[e.id + "|" + TODAY] = { target: S.prefs[e.id].target, locked: false, start: 540, end: 1080, lunch: [720, 780], mode: "office" };
+    S.blocks.push({ id: uid("k"), emp: e.id, date: TODAY, start: 780, end: 810, kind: "meeting", title: "Team sync", system: false });
+    S.reminders[e.id] = {};
+    for (const t of Object.keys(REM)) S.reminders[e.id][t] = { status: "scheduled", due: DAY_START_SEC + S.prefs[e.id].reminders[t] * 60, anchor: DAY_START_SEC, trigger: null, templateId: null, endSec: null, startedSec: null, pausedToday: false };
+  }
+  S.tasks.push({ id: "task_proposal", emp: "mei", date: TODAY, title: "Draft the product proposal", type: "deep", dur: 45, order: 1 },
+               { id: "task_replies", emp: "mei", date: TODAY, title: "Reply to routine messages", type: "routine", dur: 30, order: 2 });
+  S.blocks.push({ id: "k_proposal", emp: "mei", date: TODAY, start: 675, end: 720, kind: "task", taskId: "task_proposal", taskType: "deep", title: "Draft the product proposal", system: true, protected: true, reason: "Higher-energy window first" },
+                { id: "k_replies", emp: "mei", date: TODAY, start: 555, end: 585, kind: "task", taskId: "task_replies", taskType: "routine", title: "Reply to routine messages", system: true, protected: false, reason: "A lower-load task in an available slot" });
+  const meal = (id, title, start, price, tags, cap, booked, extra = {}) => ({ id, kind: "meal", pillar: "protect", measure: 2, title, provider: "Level 3 Canteen", date: TODAY, start, end: start + 15, location: "CBD Office · Level 3", capacity: cap, price, tags, status: "published", bookBy: 690, cancelBy: 660, online: false, eligibleTeams: ["Product Team"], ...extra, _seedBooked: booked });
+  const cls = (id, title, start, end, cap, booked, online, loc) => ({ id, kind: "class", pillar: "refuel", measure: 4, title, provider: online ? "PeakWork Live" : "Move Studio", date: TODAY, start, end, location: loc, capacity: cap, price: 0, tags: ["Movement during work"], status: "published", bookBy: start - 30, cancelBy: start - 60, online, eligibleTeams: ["Product Team"], _seedBooked: booked });
+  S.resources.push(
+    meal("m_bowl", "Vegetable grain bowl", 720, 8, ["vegetarian", "high-fibre"], 8, 3),
+    meal("m_chicken", "Chicken rice", 735, 7, ["high-protein"], 8, 5),
+    meal("m_special", "Daily special", 750, null, null, 8, 2, { note: "Price and ingredients not confirmed yet" }),
+    meal("m_veg", "Vegetarian set", 765, 6, ["vegetarian"], 8, 8),
+    cls("c_lunch", "Lunchtime group movement", 780, 825, 6, 2, false, "CBD Office · Studio L5"),
+    cls("c_after", "Afternoon group movement", 930, 975, 6, 3, false, "CBD Office · Studio L5"),
+    cls("c_online", "Online movement session", 990, 1020, 9, 4, true, "Online"),
+  );
+  const others = EMPLOYEES.filter(e => e.id !== "mei").map(e => e.id); let oi = 0;
+  for (const r of S.resources) { for (let i = 0; i < r._seedBooked; i++) { const emp = others[oi++ % others.length]; S.bookings.push({ id: uid("b"), emp, resId: r.id, date: TODAY, status: "confirmed", kind: r.kind, pillar: r.pillar, snapshot: { title: r.title, start: r.start, end: r.end, price: r.price, location: r.location }, token: uid("t"), createdSec: DAY_START_SEC - 3600 }); } delete r._seedBooked; }
+  return S;
+}
+
+/* ================= store ================= */
+let S = null, readOnly = false, failNext = false, corrupt = null;
+const UI = { route: "/today", modal: null, activityAlt: null, draftTask: { title: "", type: "deep", dur: 45 }, flexStart: null, mealUnknownOk: false, showIllustrative: true, swap: false, availOnly: false, libFilter: { pos: "all", space: "all", dur: "all" }, reviewDraft: null, toastQueue: [], rcDraft: null };
+let EV = [], EV_TRUNC = 0, CLOCK = { sec: DAY_START_SEC, paused: false };
+
+function lsGet(k) { try { return localStorage.getItem(k); } catch { return null; } }
+function lsSet(k, v) { localStorage.setItem(k, v); }
+function validate(o) {
+  if (!o || typeof o !== "object") throw new Error("not an object");
+  if (o.schema_version !== SCHEMA) throw new Error("unsupported schema_version " + o.schema_version);
+  for (const k of ["prefs", "energyLogs", "habits", "reviews", "blocks", "resources", "bookings", "reminders", "plans"]) if (!(k in o)) throw new Error("missing " + k);
+  return o;
+}
+function loadAll() {
+  const raw = lsGet(KEY);
+  if (raw) { try { S = validate(JSON.parse(raw)); } catch (e) { corrupt = { raw, why: e.message }; S = seed(); readOnly = true; } }
+  else { S = seed(); try { lsSet(KEY, JSON.stringify(S)); } catch { } }
+  try { const c = JSON.parse(lsGet(CLOCK_KEY)); if (c && typeof c.sec === "number") CLOCK = c; } catch { }
+  try { const e = JSON.parse(lsGet(EV_KEY)); if (e && Array.isArray(e.list)) { EV = e.list; EV_TRUNC = e.trunc || 0; } } catch { }
+}
+function persist(next) {
+  const prev = lsGet(KEY);
+  lsSet(KEY, JSON.stringify(next));
+  if (prev) try { lsSet(BAK, prev); } catch { }
+}
+function saveClock() { try { lsSet(CLOCK_KEY, JSON.stringify(CLOCK)); } catch { } }
+function resetDemo() { S = seed(); CLOCK = { sec: DAY_START_SEC, paused: false }; EV = []; EV_TRUNC = 0; corrupt = null; readOnly = false; try { persist(S); lsSet(EV_KEY, JSON.stringify({ list: [], trunc: 0 })); } catch { } saveClock(); }
+
+/* ================= analytics (whitelist, local only) ================= */
+const EVENT_PROPS = {
+  page_view: ["route_id"], onboarding_completed: ["skipped_optional"], energy_submitted: ["operation", "source"], battery_suggestion_clicked: ["pillar"], pillar_entry_clicked: ["pillar"],
+  plan_saved: ["operation"], recommendation_viewed: ["kind", "algorithm_version", "candidate_count", "reason_codes"], energy_plan_previewed: ["task_type_counts", "moved_block_count"], energy_plan_applied: ["task_type_counts", "moved_block_count"],
+  focus_confirmed: ["basis", "duration_seconds"], flex_start_changed: ["changed_keys"], rhythm_card_exported: ["method"], reminder_shown: ["reminder_type", "trigger"], reminder_action: ["action", "reason_code", "reminder_type"],
+  habit_completed: ["pillar", "activity_type", "template_id", "duration_seconds"], booking_attempted: ["resource_type", "slot_id"], booking_succeeded: ["resource_type", "slot_id"], booking_failed: ["resource_type", "slot_id", "error_code"], booking_cancelled: ["resource_type", "slot_id", "reason_code"],
+  usage_confirmed: ["confirmation_method", "resource_type"], review_submitted: ["operation", "questionnaire_version"], pulse_submitted: ["operation", "questionnaire_version"], outcome_viewed: ["scope", "metric_count", "ready_count", "period_preset"],
+  settings_saved: ["changed_keys"], policy_saved: ["changed_keys"], storage_error: ["error_code"], rest_requested: [], buddy_invited: [],
+};
+const SESSION = uid("s");
+function track(name, props = {}, entity) {
+  try {
+    const allow = EVENT_PROPS[name]; if (!allow) return;
+    const p = {}; for (const k of allow) if (k in props) p[k] = props[k];
+    EV.push({ event_id: uid("ev"), event_name: name, schema_version: 1, session_id: SESSION, actor_id: S.view.role === "manager" ? "manager_demo" : "emp_" + S.view.emp, actor_role: S.view.role, page_id: UI.route, occurred_at: `${TODAY}T${hms(CLOCK.sec)}:${pad(Math.floor(CLOCK.sec % 60))}+08:00`, flow_id: props.flow_id || null, entity_type: entity?.type || null, entity_id: entity?.id || null, properties: p });
+    if (EV.length > 2000) { EV_TRUNC += EV.length - 2000; EV = EV.slice(-2000); }
+    lsSet(EV_KEY, JSON.stringify({ list: EV, trunc: EV_TRUNC }));
+  } catch { }
+}
+
+/* ================= command layer ================= */
+function run(name, fn, opts = {}) {
+  const user = opts.user !== false;
+  if (readOnly) { toast(corrupt ? "Saved data needs attention before changes can be made." : "This demo changed in another tab. Reload to continue.", "bad"); return { ok: false, code: "READ_ONLY" }; }
+  if (opts.role && S.view.role !== opts.role) { toast("Not available in this view.", "bad"); return { ok: false, code: "FORBIDDEN" }; }
+  const draft = structuredClone(S);
+  let res;
+  try { res = fn(draft) || {}; }
+  catch (e) { if (e instanceof BizErr) { return { ok: false, code: e.code, message: e.message, extra: e.extra }; } console.error(e); toast("Something went wrong. Nothing was saved.", "bad"); return { ok: false, code: "UNEXPECTED" }; }
+  if (user && failNext) { failNext = false; toast("Not saved. Please try again.", "bad"); track("storage_error", { error_code: "SIMULATED_WRITE_FAILURE" }); return { ok: false, code: "STORAGE_FAILED", message: "Not saved. Please try again." }; }
+  try { persist(draft); } catch { toast("Not saved. Please try again.", "bad"); track("storage_error", { error_code: "WRITE_FAILED" }); return { ok: false, code: "STORAGE_FAILED", message: "Not saved. Please try again." }; }
+  S = draft;
+  return { ok: true, ...res };
+}
+
+/* ================= selectors ================= */
+const nowMin = () => Math.floor(CLOCK.sec / 60);
+const me = () => S.view.emp;
+const P = (emp = me()) => S.prefs[emp];
+const plan = (emp = me(), d = TODAY) => S.plans[emp + "|" + d];
+const empName = id => S.employees.find(e => e.id === id)?.name || id;
+const logsOf = (emp, d) => S.energyLogs.filter(l => l.emp === emp && (!d || l.date === d)).sort((a, b) => a.date.localeCompare(b.date) || a.min - b.min);
+function latestRating(emp = me(), d = TODAY) { const l = logsOf(emp, d); return l.length ? l[l.length - 1].rating : null; }
+function batteryState(r) {
+  if (r == null) return { cells: 0, label: "No check-in yet", copy: "Check in to see your battery", pillar: null, cls: "empty" };
+  if (r <= 2) return { cells: r, label: "Low battery", copy: "Let's recharge first.", pillar: "refuel", cls: "low" };
+  if (r === 3) return { cells: 3, label: "Steady", copy: "Keep the drain low.", pillar: "protect", cls: "" };
+  return { cells: r, label: "Charged", copy: "Spend it where it counts.", pillar: "use_well", cls: "" };
+}
+const habitsToday = (emp = me(), pillar) => S.habits.filter(h => h.emp === emp && h.date === TODAY && (!pillar || h.pillar === pillar));
+function blocksToday(emp = me()) {
+  const pl = plan(emp);
+  const out = S.blocks.filter(b => b.emp === emp && b.date === TODAY).map(b => ({ ...b }));
+  if (pl) out.push({ id: "lunch", kind: "lunch", start: pl.lunch[0], end: pl.lunch[1], title: "Lunch break" });
+  for (const b of S.bookings.filter(b => b.emp === emp && b.date === TODAY && b.resId && ["confirmed", "completed", "no_show"].includes(b.status))) {
+    const r = S.resources.find(x => x.id === b.resId);
+    out.push({ id: "bk_" + b.id, kind: "booking", bookingId: b.id, start: b.snapshot.start, end: b.snapshot.end, title: b.snapshot.title, resKind: r?.kind, online: r?.online, overlapsLunchOk: r?.kind === "meal" });
+  }
+  return out.sort((a, b) => a.start - b.start);
+}
+function blockingAt(emp, min) { return blocksToday(emp).find(b => min >= b.start && min < b.end && (b.kind === "meeting" || (b.kind === "task" && b.protected) || b.kind === "focus")); }
+
+/* energy curve */
+function curve(emp = me(), dates = [...BASELINE, ...COMPARISON]) {
+  const logs = S.energyLogs.filter(l => l.emp === emp && dates.includes(l.date));
+  const pts = TPS.map(tp => {
+    const byDate = {};
+    for (const l of logs) { const near = TPS.reduce((a, b) => Math.abs(b - l.min) < Math.abs(a - l.min) ? b : a); if (near === tp) (byDate[l.date] ||= []).push(l.rating); }
+    const dayVals = Object.values(byDate).map(v => v[v.length - 1]);
+    return { tp, n: dayVals.length, v: dayVals.length >= 3 ? mean(dayVals) : null };
+  });
+  const recordedDays = new Set(logs.map(l => l.date)).size;
+  const q = pts.filter(p => p.v != null);
+  let win = null;
+  if (q.length) { const max = Math.max(...q.map(p => p.v)); const top = pts.map(p => p.v != null && p.v >= max - 0.35); let i = top.indexOf(true), j = i; while (j + 1 < top.length && top[j + 1]) j++; win = [pts[i].tp - 30, pts[j].tp + 30]; }
+  return { pts, recordedDays, win, qualified: q.length > 0 };
+}
+function energyAt(c, t) {
+  const pts = c.pts;
+  if (t <= pts[0].tp) return pts[0].v != null && pts[0].tp - t <= 30 ? pts[0].v : null;
+  if (t >= pts[pts.length - 1].tp) { const l = pts[pts.length - 1]; return l.v != null && t - l.tp <= 60 ? l.v : null; }
+  for (let i = 0; i < pts.length - 1; i++) { const a = pts[i], b = pts[i + 1]; if (t >= a.tp && t <= b.tp) { if (a.v == null || b.v == null) return null; return a.v + (b.v - a.v) * (t - a.tp) / (b.tp - a.tp); } }
+  return null;
+}
+function slotEnergy(c, s, e) { const v = []; for (let t = s; t <= e; t += 15) { const x = energyAt(c, t); if (x == null) return null; v.push(x); } return mean(v); }
+
+/* energy-led plan preview */
+function buildPreview(emp = me(), draftS = S) {
+  const SS = draftS, pl = SS.plans[emp + "|" + TODAY], pref = SS.prefs[emp].focusWindow, core = SS.company.core;
+  const c = curve(emp);
+  const fixed = [];
+  for (const b of SS.blocks.filter(b => b.emp === emp && b.date === TODAY && !(b.kind === "task" && b.system))) fixed.push([b.start, b.end]);
+  fixed.push(pl.lunch);
+  for (const b of SS.bookings.filter(b => b.emp === emp && b.date === TODAY && b.resId && ["confirmed", "completed", "no_show"].includes(b.status))) fixed.push([b.snapshot.start, b.snapshot.end]);
+  const nm = Math.floor(CLOCK.sec / 60);
+  const earliest = Math.max(pl.start, Math.ceil((nm + 1) / 15) * 15);
+  const order = { deep: 0, collab: 1, routine: 2 };
+  const tasks = SS.tasks.filter(t => t.emp === emp && t.date === TODAY).sort((a, b) => order[a.type] - order[b.type] || a.order - b.order);
+  const placed = [], items = [];
+  for (const t of tasks) {
+    const cands = [];
+    for (let s = earliest; s + t.dur <= pl.end; s += 15) {
+      const e = s + t.dur;
+      if (fixed.some(f => overlap(s, e, f[0], f[1])) || placed.some(f => overlap(s, e, f[0], f[1]))) continue;
+      if (t.type === "collab" && !(s >= core[0] && e <= core[1])) continue;
+      cands.push({ s, e, inPref: s >= pref[0] && e <= pref[1], en: c.qualified ? slotEnergy(c, s, e) : null });
+    }
+    const nl = (a, b, dir) => (a == null) - (b == null) || (a == null ? 0 : dir * (b - a));
+    if (t.type === "deep") cands.sort((a, b) => (b.inPref - a.inPref) || nl(a.en, b.en, 1) || a.s - b.s);
+    else if (t.type === "collab") cands.sort((a, b) => (a.inPref - b.inPref) || a.s - b.s);
+    else cands.sort((a, b) => (a.inPref - b.inPref) || nl(a.en, b.en, -1) || a.s - b.s);
+    const pick = cands[0];
+    if (!pick) { items.push({ taskId: t.id, title: t.title, type: t.type, start: null, end: null, reason: "No available slot today" }); continue; }
+    placed.push([pick.s, pick.e]);
+    const basisPref = !c.qualified || (t.type === "deep" && pick.en == null && !pick.inPref);
+    const reason = t.type === "deep" ? (basisPref ? "Based on your preferences" : "Higher-energy window first") : t.type === "collab" ? "Inside core collaboration hours" : "A lower-load task in an available slot";
+    items.push({ taskId: t.id, title: t.title, type: t.type, start: pick.s, end: pick.e, reason, energy: pick.en });
+  }
+  items.sort((a, b) => (a.start ?? 9999) - (b.start ?? 9999));
+  const sig = items.map(i => `${i.taskId}@${i.start}`).join("|");
+  const cur = SS.blocks.filter(b => b.emp === emp && b.date === TODAY && b.kind === "task" && b.system);
+  const moved = items.filter(i => { const b = cur.find(x => x.taskId === i.taskId); return !b || b.start !== i.start; }).length;
+  return { items, sig, moved, basis: c.qualified ? "history" : "preferences", days: c.recordedDays };
+}
+const appliedSig = (emp = me()) => S.blocks.filter(b => b.emp === emp && b.date === TODAY && b.kind === "task" && b.system).sort((a, b) => a.start - b.start).map(b => `${b.taskId}@${b.start}`).join("|");
+
+/* resource availability (fixed check order) */
+function evalResource(r, emp = me()) {
+  const reasons = [], fits = [];
+  const pr = P(emp), pl = plan(emp), nm = nowMin();
+  const mine = S.bookings.find(b => b.emp === emp && b.resId === r.id && b.status !== "cancelled");
+  const used = S.bookings.filter(b => b.resId === r.id && ["confirmed", "completed", "no_show"].includes(b.status)).length;
+  const left = r.capacity - used;
+  if (r.status !== "published") reasons.push({ code: "CANCELLED", text: "This session was cancelled by the provider." });
+  else if (nm >= r.bookBy) reasons.push({ code: "DEADLINE_PASSED", text: `Booking closed at ${hm(r.bookBy)}.` });
+  if (!r.eligibleTeams.includes("Product Team")) reasons.push({ code: "NOT_ELIGIBLE", text: "Not offered to your team." });
+  if (!r.online && pl.mode !== "office") reasons.push({ code: "NOT_ON_SITE", text: "You are remote today." });
+  if (left <= 0 && !mine) reasons.push({ code: "SOLD_OUT", text: "Sold out." });
+  if (r.kind === "meal" && pr.strictTags.length) { if (!r.tags || !pr.strictTags.every(t => r.tags.includes(t))) reasons.push({ code: "DIETARY", text: "Does not meet your dietary requirements." }); }
+  if (!mine) {
+    const blocks = blocksToday(emp).filter(b => !(b.kind === "task" && !b.protected) && !(r.kind === "meal" && b.kind === "lunch"));
+    const clash = blocks.find(b => overlap(r.start, r.end, b.start, b.end));
+    if (clash) reasons.push({ code: "TIME_CONFLICT", text: clash.kind === "lunch" ? "Overlaps your lunch break." : `Time conflict with '${clash.title}'.` });
+    if (r.kind === "class" && !S.company.exerciseInWork) reasons.push({ code: "POLICY", text: "Exercise in work hours is switched off." });
+    if (r.start < pl.start || r.end > pl.end) reasons.push({ code: "OUTSIDE_WORKDAY", text: "Outside your working hours." });
+  }
+  let cost = r.price;
+  if (r.kind === "meal" && cost != null && S.company.subsidy.on) cost = Math.max(0, cost - S.company.subsidy.amount);
+  const priceUnknown = r.kind === "meal" && r.price == null;
+  if (r.kind === "meal" && pr.budget != null && cost != null && cost > pr.budget) reasons.push({ code: "OVER_BUDGET", text: `Above your S$${pr.budget.toFixed(2)} budget.` });
+  const softMatch = r.tags ? r.tags.filter(t => pr.softTags.includes(t)).length : 0;
+  if (r.kind === "meal") { if (softMatch) fits.push("Matches food preferences"); if (!reasons.some(x => x.code === "TIME_CONFLICT")) fits.push("Suitable time"); }
+  else { fits.push("Fits your workday"); if (!reasons.some(x => x.code === "TIME_CONFLICT")) fits.push("No schedule conflict"); }
+  return { ok: reasons.length === 0, reasons, fits, left, used, mine, cost, priceUnknown, softMatch };
+}
+function weekExerciseMin(emp = me()) { return S.bookings.filter(b => b.emp === emp && b.date === TODAY && b.kind === "class" && b.resId && ["confirmed", "completed", "no_show"].includes(b.status)).reduce((a, b) => a + (b.snapshot.end - b.snapshot.start), 0); }
+
+/* nudge candidates */
+function candidates(type, emp = me()) {
+  const pr = P(emp).activity, types = REM[type].types, nm = nowMin();
+  const blk = blocksToday(emp).filter(b => b.start > nm && (b.kind === "meeting" || b.kind === "lunch" || (b.kind === "task" && b.protected))).sort((a, b) => a.start - b.start)[0];
+  const avail = blk ? (blk.start - nm) * 60 : 9999;
+  const spaceOk = sp => pr.space === "near_desk" ? true : sp === "at_desk";
+  return TEMPLATES.filter(t => types.includes(t.type) && t.status === "published" && t.source && t.positions.some(p => pr.positions.includes(p)) && spaceOk(t.space)
+    && t.equipment.every(q => pr.equipment.includes(q)) && t.sec <= pr.maxSec && t.sec <= avail && !t.incompatible.some(x => pr.avoid.includes(x)))
+    .map(t => ({ t, m: t.feeling.filter(f => pr.feeling.includes(f)).length }))
+    .sort((a, b) => b.m - a.m || a.t.sec - b.t.sec || a.t.id.localeCompare(b.t.id)).slice(0, 3).map(x => x.t);
+}
+
+/* action meets energy */
+function actionMeetsEnergy(emp = me()) {
+  const days = HISTORY_DATES.filter(d => d < TODAY);
+  const hi = [], lo = [];
+  for (const d of days) {
+    const aft = logsOf(emp, d).filter(l => l.min >= 840 && l.min <= 960);
+    if (!aft.length) continue;
+    const at = aft[0].min, v = aft[0].rating;
+    const n = S.habits.filter(h => h.emp === emp && h.date === d && h.min < at).length;
+    (n >= 3 ? hi : lo).push(v);
+  }
+  return { hi: hi.length, lo: lo.length, hiV: hi.length >= 3 ? mean(hi) : null, loV: lo.length >= 3 ? mean(lo) : null, days: hi.length + lo.length };
+}
+
+/* rest without explaining */
+function restState(emp = me()) {
+  const workdays = [...HISTORY_DATES, TODAY].filter(d => d <= TODAY);
+  const withToday = latestRating(emp, TODAY) != null;
+  const seq = (withToday ? workdays : workdays.filter(d => d < TODAY)).slice(-3);
+  const low = seq.length === 3 && seq.every(d => { const r = latestRating(emp, d); return r != null && r <= 2; });
+  const used = S.rest.filter(r => r.emp === emp && r.status === "approved").length;
+  const left = S.company.allowancePerQuarter - used;
+  const todayReq = S.rest.find(r => r.emp === emp && r.requestedOn === TODAY);
+  return { triggered: low, left, used, todayReq };
+}
+
+/* metrics */
+function periodVals(emp, dates, key) {
+  if (key === "energy") { const v = dates.map(d => { const l = logsOf(emp, d); return l.length ? mean(l.map(x => x.rating)) : null; }).filter(x => x != null); return { n: v.length, v: v.length >= 3 ? mean(v) : null }; }
+  const revs = S.reviews.filter(r => r.emp === emp && dates.includes(r.date));
+  if (key === "completion") { const ok = revs.filter(r => r.completed != null && r.planned); const sp = ok.reduce((a, r) => a + r.planned, 0); return { n: ok.length, v: ok.length >= 3 && sp ? ok.reduce((a, r) => a + r.completed, 0) / sp * 100 : null }; }
+  const v = revs.map(r => r[key]).filter(x => x != null); return { n: v.length, v: v.length >= 3 ? mean(v) : null };
+}
+const METRICS = [
+  { key: "perf", label: "Work effectiveness", unit: "/5", dir: 1, src: "Daily reflection, self-rated 1–5" },
+  { key: "completion", label: "Task completion", unit: "%", dir: 1, src: "Completed ÷ planned tasks" },
+  { key: "fatigue", label: "Fatigue", unit: "/5", dir: -1, src: "Daily reflection, 1–5, lower is better" },
+  { key: "wellbeing", label: "Wellbeing", unit: "/5", dir: 1, src: "Daily reflection, 1–5" },
+  { key: "energy", label: "Average energy", unit: "/5", dir: 1, src: "Self-reported check-ins, 1–5" },
+  { key: "health", label: "Health feeling", unit: "/5", dir: 1, src: "Daily reflection, 1–5" },
+];
+function teamMetric(key, A = BASELINE, B = COMPARISON) {
+  const pairs = [];
+  for (const e of S.employees) {
+    if (key === "wlb" || key === "recommend") { const a = S.pulses.find(p => p.emp === e.id && p.week === A[0]), b = S.pulses.find(p => p.emp === e.id && p.week === B[0]); if (a?.[key] != null && b?.[key] != null) pairs.push([a[key], b[key]]); continue; }
+    const a = periodVals(e.id, A, key), b = periodVals(e.id, B, key); if (a.v != null && b.v != null) pairs.push([a.v, b.v]);
+  }
+  return { n: pairs.length, ready: pairs.length >= 5, a: pairs.length >= 5 ? mean(pairs.map(p => p[0])) : null, b: pairs.length >= 5 ? mean(pairs.map(p => p[1])) : null };
+}
+function completeDay(emp, d) {
+  const pl = S.plans[emp + "|" + d]; if (!pl) return false;
+  const e = S.energyLogs.some(l => l.emp === emp && l.date === d && l.min >= pl.start && l.min <= pl.end);
+  const a = S.habits.some(h => h.emp === emp && h.date === d) || S.bookings.some(b => b.emp === emp && b.date === d && b.status === "completed");
+  const r = S.reviews.some(x => x.emp === emp && x.date === d);
+  return e && a && r;
+}
+function weeklyLoop(dates) { const ach = S.employees.filter(e => dates.filter(d => completeDay(e.id, d)).length >= 3); return { n: ach.length, of: S.employees.length }; }
+function teamRhythm() {
+  return TPS.map(tp => {
+    const per = [];
+    for (const e of S.employees) {
+      const byDate = {};
+      for (const l of S.energyLogs.filter(l => l.emp === e.id && l.date < TODAY)) { const near = TPS.reduce((a, b) => Math.abs(b - l.min) < Math.abs(a - l.min) ? b : a); if (near === tp) byDate[l.date] = l.rating; }
+      const v = Object.values(byDate); if (v.length >= 3) per.push(mean(v));
+    }
+    return { tp, n: per.length, v: per.length >= 5 ? mean(per) : null };
+  });
+}
+function pillarUsage(dates) {
+  const out = {};
+  for (const p of Object.keys(PILLARS)) {
+    const hs = S.habits.filter(h => h.pillar === p && dates.includes(h.date));
+    const bs = S.bookings.filter(b => b.pillar === p && dates.includes(b.date) && b.status !== "cancelled");
+    const ap = p === "use_well" ? S.planApplies.filter(a => dates.includes(a.date)) : [];
+    const people = new Set([...hs.map(h => h.emp), ...bs.map(b => b.emp), ...ap.map(a => a.emp)]);
+    out[p] = { people: people.size, actions: hs.length, bookings: bs.length, used: bs.filter(b => b.status === "completed").length, applies: ap.length, byMeasure: {} };
+  }
+  return out;
+}
+
+/* ================= reminder engine ================= */
+function syncReminders(trigger = "clock") {
+  const emp = me(); if (S.view.role !== "employee" || readOnly) return;
+  const rs = S.reminders[emp], pl = plan(emp), now = CLOCK.sec, nm = Math.floor(now / 60);
+  let changes = [];
+  const busy = Object.values(rs).some(r => r.status === "shown" || r.status === "in_progress");
+  const due = [];
+  for (const [type, r] of Object.entries(rs)) {
+    const iv = P(emp).reminders[type];
+    if (!iv || r.pausedToday) continue;
+    if (!["scheduled", "snoozed"].includes(r.status) || now < r.due) continue;
+    if (nm >= pl.end) { changes.push([type, { status: "expired" }]); continue; }
+    const blk = blockingAt(emp, nm);
+    if (blk) { changes.push([type, { due: blk.end * 60 }]); continue; }
+    if (nm >= pl.lunch[0] && nm < pl.lunch[1]) { changes.push([type, { due: pl.lunch[1] * 60 }]); continue; }
+    due.push(type);
+  }
+  if (!busy && due.length) {
+    const first = due.includes("move_timer") ? "move_timer" : due[0];
+    changes.push([first, { status: "shown", shownSec: now }]);
+    for (const t of due) if (t !== first) changes.push([t, { due: now + 300 }]);
+  }
+  // buddy auto-replies (demo partner accepts after 2 logical minutes)
+  const pend = S.buddies.filter(b => b.from === emp && b.status === "pending" && now - b.sentSec >= 120);
+  if (!changes.length && !pend.length) return false;
+  const res = run("sync_reminders", d => {
+    for (const [t, ch] of changes) Object.assign(d.reminders[emp][t], ch);
+    for (const b of pend) { const x = d.buddies.find(y => y.id === b.id); x.status = "accepted"; d.blocks.push({ id: uid("k"), emp, date: TODAY, start: x.start, end: x.start + 30, kind: "buddy", title: (x.type === "lunch" ? "Lunch with " : "Move with ") + empName(x.to), system: false }); }
+  }, { user: false });
+  if (res.ok) {
+    for (const [t, ch] of changes) if (ch.status === "shown") track("reminder_shown", { reminder_type: t, trigger: S.reminders[emp][t].trigger || "clock" });
+    for (const b of pend) toast(`${empName(b.to)} accepted your ${b.type === "lunch" ? "lunch" : "movement"} invite.`);
+    render();
+  }
+  return true;
+}
+
+/* ================= icons ================= */
+const IC = {
+  protect: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 8.3-7 10-4-1.7-7-5.5-7-10V6l7-3z"/><path d="M9 12l2 2 4-4"/></svg>',
+  refuel: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/></svg>',
+  use_well: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg>',
+  today: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="17" height="10" rx="2.5"/><path d="M22 10.5v3"/><path d="M5.5 10.5v3M9 10.5v3"/></svg>',
+  report: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>',
+  outcomes: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg>',
+  people: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.5 3.4-5.5 6.5-5.5s5.7 2 6.5 5.5"/><path d="M16 4.5a3.5 3.5 0 010 7M21.5 20c-.5-2.4-1.8-4-3.5-4.8"/></svg>',
+  sliders: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>',
+  clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+};
+const LOGO = `<svg viewBox="0 0 120 60" aria-hidden="true"><rect x="4" y="12" width="100" height="44" rx="10" fill="#0C0D07"/><rect x="10" y="18" width="88" height="32" rx="6" fill="#20221A"/><rect x="106" y="27" width="9" height="14" rx="3" fill="#0C0D07"/><path d="M18 46l17-17 9 9z" fill="#8BD84A"/><path d="M33 46l23-26 22 26z" fill="#D4F25A"/><path d="M56 2c1.3 6 3 7.6 9 9-6 1.4-7.7 3-9 9-1.3-6-3-7.6-9-9 6-1.4 7.7-3 9-9z" fill="#D4E824" stroke="#0C0D07" stroke-width="2" stroke-linejoin="round"/></svg>`;
+const ptag = (p, txt) => `<span class="ptag ${p}">${IC[p]}${esc(txt ?? PILLARS[p].short)}</span>`;
+const mchip = (id, sub = true) => { const m = M(id); return `<span class="mchip"><span class="n">${m.id}</span><span>${esc(m.name)}${sub ? `<small>App · ${esc(m.app)}</small>` : ""}</span></span>`; };
+function battery(r, size = "md", extra = "") {
+  const st = batteryState(r);
+  const cells = r == null ? `<div class="q">?</div>` : [1, 2, 3, 4, 5].map(i => `<span class="cell ${i <= st.cells ? "on" : ""}"></span>`).join("");
+  const label = r == null ? "Battery unknown. Check in to see your battery" : `${st.cells} of 5, ${st.label}`;
+  return `<div class="battery ${size} ${st.cls} ${extra}" role="img" aria-label="${esc(label)}"><div class="body">${cells}</div><div class="cap"></div></div>`;
+}
+
+/* ================= routing ================= */
+const ROUTES = ["/today", "/protect", "/refuel", "/use-well", "/report", "/settings", "/admin/outcomes", "/admin/participation", "/admin/resources"];
+const REDIRECT = { "/plan": "/use-well", "/progress": "/report", "/support?type=meal": "/protect", "/support?type=workout": "/refuel", "/support": "/protect", "/schedule": "/use-well" };
+function readRoute() {
+  let v = null;
+  try { const q = new URLSearchParams(location.search); v = q.get("view"); if (v && q.get("type")) v += "?type=" + q.get("type"); } catch { }
+  if (!v && location.hash.length > 1) { const h = location.hash.slice(1); v = ({ today: "/today", protect: "/protect", refuel: "/refuel", "use-well": "/use-well", report: "/report", settings: "/settings", outcomes: "/admin/outcomes", participation: "/admin/participation", resources: "/admin/resources" })[h] || null; }
+  if (v && REDIRECT[v]) v = REDIRECT[v];
+  return ROUTES.includes(v) ? v : null;
+}
+function go(route, opts = {}) {
+  if (REDIRECT[route]) route = REDIRECT[route];
+  if (route.startsWith("/admin") && S.view.role !== "manager") route = "/today";
+  if (!route.startsWith("/admin") && S.view.role === "manager") route = "/admin/outcomes";
+  UI.route = route;
+  render(); track("page_view", { route_id: route });
+  if (!opts.keepScroll) window.scrollTo({ top: 0 });
+  if (opts.anchor) setTimeout(() => document.getElementById(opts.anchor)?.scrollIntoView({ behavior: "smooth", block: "start" }), 30);
+  $("#main")?.focus({ preventScroll: true });
+}
+
+/* ================= toast ================= */
+function toast(msg, kind = "", withBattery = false) {
+  const root = $("#toast-root"); if (!root) return;
+  const el = document.createElement("div"); el.className = "toast " + kind;
+  el.innerHTML = (withBattery ? battery(5, "sm") : "") + `<span>${esc(msg)}</span>`;
+  root.appendChild(el); setTimeout(() => el.remove(), 3600);
+}
+
+/* ================= shell render ================= */
+function render() {
+  if (!S) return;
+  renderTop(); renderNav(); renderBanner(); renderMain(); renderModal(); renderActivity();
+}
+function renderTop() {
+  const mgr = S.view.role === "manager";
+  $("#top").innerHTML = `
+    <button class="logo" data-act="nav" data-to="${mgr ? "/admin/outcomes" : "/today"}" aria-label="PeakWork home">${LOGO}<span class="word">Peak<b>Work</b></span></button>
+    <span class="badge-synth">Synthetic demo data</span>
+    <span class="grow"></span>
+    ${mgr ? `<span class="rolepill">Manager view</span>` : ""}
+    <button class="clockbtn" data-act="demo" aria-label="Demo clock and controls, ${hms(CLOCK.sec)}"><span class="live ${CLOCK.paused ? "off" : ""}"></span><span class="t num" id="clock-t">${hms(CLOCK.sec)}</span><span class="lbl">Demo clock & controls</span></button>
+    ${mgr ? "" : `<button class="avatar" data-act="nav" data-to="/settings" aria-label="${esc(empName(me()))}: edit my preferences">${esc(empName(me())[0])}</button>`}`;
+}
+function navItems() {
+  if (S.view.role === "manager") return [["/admin/outcomes", "Outcomes", IC.outcomes], ["/admin/participation", "Participation", IC.people], ["/admin/resources", "Resources & policies", IC.sliders]];
+  return [["/today", "Today", IC.today], ["/protect", "Protect", IC.protect], ["/refuel", "Refuel", IC.refuel], ["/use-well", "Use well", IC.use_well], ["/report", "Report", IC.report]];
+}
+function renderNav() {
+  const items = navItems();
+  const btn = ([r, l, ic]) => `<button class="navbtn" data-act="nav" data-to="${r}" ${UI.route === r ? 'aria-current="page"' : ""}>${ic}<span>${esc(l)}</span></button>`;
+  const mgr = S.view.role === "manager";
+  $("#side").innerHTML = `<div class="lbl">${mgr ? "Workplace insights" : esc(empName(me())) + " · " + esc(S.company.team)}</div>${items.map(btn).join("")}<div class="sep"></div>
+    ${mgr ? `<button class="navbtn" data-act="role" data-role="employee">${IC.today}<span>Employee view</span></button>` : `<button class="navbtn" data-act="nav" data-to="/settings" ${UI.route === "/settings" ? 'aria-current="page"' : ""}>${IC.sliders}<span>Preferences</span></button>`}`;
+  $("#bottom").innerHTML = items.map(btn).join("") + (mgr ? `<button class="navbtn" data-act="role" data-role="employee">${IC.today}<span>Employee</span></button>` : "");
+  $("#bottom").style.gridTemplateColumns = `repeat(${mgr ? 4 : 5},1fr)`;
+}
+function renderBanner() {
+  const root = $("#banner-root");
+  if (S.view.role !== "employee") { root.innerHTML = ""; return; }
+  const rs = S.reminders[me()];
+  const type = Object.keys(rs).find(t => rs[t].status === "shown");
+  if (!type) { root.innerHTML = ""; return; }
+  const r = rs[type], def = REM[type], c = candidates(type)[0];
+  const iv = P().reminders[type];
+  const since = Math.max(0, Math.round((CLOCK.sec - r.anchor) / 60));
+  const demo = r.trigger === "demo";
+  let line;
+  if (type === "break_nudge") line = `${demo ? `Demo trigger, as if ${iv} min` : `${since} min`} since your last break. ${c ? `Rest your eyes for ${c.sec} seconds?` : "Take a short pause?"}`;
+  else line = `${demo ? `Demo trigger, as if ${iv} min in` : `${since} min in`}. ${c ? `A ${c.sec}-second move?` : "Pause for a moment?"}`;
+  root.innerHTML = `<div class="nudge" role="alert">
+    <span class="ic ${type === "break_nudge" ? "bg-protect" : "bg-refuel"}">${IC[def.pillar]}</span>
+    <div class="tx"><b>${esc(line)}</b><small>${esc(PILLARS[def.pillar].short)} · ${M(def.measure).id} ${esc(def.label)} · Timed by the demo clock. PeakWork does not monitor your screen.</small></div>
+    <div class="row">
+      ${c ? `<button class="btn lime sm" data-act="rem-start" data-type="${type}">Start</button>` : ""}
+      <button class="btn ghost sm" data-act="rem-later" data-type="${type}">Later 10 min</button>
+      <button class="btn ghost sm" data-act="rem-skip" data-type="${type}">Skip</button>
+      <button class="linkbtn small" data-act="rem-pause" data-type="${type}">Pause for today</button>
+    </div></div>`;
+}
+function renderMain() {
+  const m = $("#main");
+  const views = { "/today": vToday, "/protect": vProtect, "/refuel": vRefuel, "/use-well": vUseWell, "/report": vReport, "/settings": vSettings, "/admin/outcomes": vOutcomes, "/admin/participation": vParticipation, "/admin/resources": vResources };
+  const keep = { x: window.scrollX, y: window.scrollY };
+  const active = document.activeElement?.id;
+  m.innerHTML = `<div class="page">${(views[UI.route] || vToday)()}</div>`;
+  if (active) { const el = document.getElementById(active); if (el && m.contains(el)) { el.focus({ preventScroll: true }); if (el.setSelectionRange && el.type === "text") { const n = el.value.length; el.setSelectionRange(n, n); } } }
+  window.scrollTo(keep.x, keep.y);
+}
+
+/* ================= common blocks ================= */
+function pillarHead(p, ids) {
+  const P_ = PILLARS[p];
+  return `<div class="pillar-head"><span class="pic bg-${p}">${IC[p]}</span><div class="stack" style="gap:4px;min-width:0">
+    <span class="eyebrow">${esc(P_.trait)}</span><h1>${esc(P_.name)}</h1><p class="muted">${esc(P_.line)}. Company policy plus a PeakWork app feature.</p></div></div>
+    <div class="leads"><span class="k">Measures</span>${ids.map(i => mchip(i)).join("")}</div>`;
+}
+function nextReminderText(type, emp = me()) {
+  const r = S.reminders[emp][type], iv = P(emp).reminders[type];
+  if (!iv) return "Off";
+  if (r.pausedToday) return "Paused until tomorrow";
+  if (r.status === "shown") return "Showing now";
+  if (r.status === "in_progress") return "In progress";
+  if (r.status === "expired") return "Ended for today";
+  return "Next at " + hms(Math.max(r.due, CLOCK.sec));
+}
+function nextUp() {
+  const nm = nowMin();
+  const b = blocksToday().filter(b => b.end > nm && b.kind !== "lunch").sort((a, b) => a.start - b.start)[0];
+  const l = plan().lunch;
+  const lunch = l[1] > nm ? { start: l[0], end: l[1], title: "Lunch break", kind: "lunch" } : null;
+  return [b, lunch].filter(Boolean).sort((a, b) => a.start - b.start)[0];
+}
+const kindLabel = b => b.kind === "task" ? (b.taskType === "deep" ? "Deep work · protected" : b.taskType === "collab" ? "Collaboration" : "Routine") : b.kind === "booking" ? (b.resKind === "meal" ? "Meal booking" : "Movement class") : b.kind === "meeting" ? "Meeting" : b.kind === "buddy" ? "Buddy" : b.kind === "lunch" ? "Lunch" : b.kind;
+
+/* ================= Today ================= */
+function vToday() {
+  const r = latestRating(), st = batteryState(r), pl = plan(), nm = nowMin();
+  const logs = logsOf(me(), TODAY);
+  const greet = nm < 720 ? "Good morning" : nm < 1080 ? "Good afternoon" : "Good evening";
+  const rest = restState();
+  const nu = nextUp();
+  const cw = curve().win;
+  let sugg = "";
+  if (r == null) sugg = "";
+  else if (st.pillar === "refuel") { const c = candidates("move_timer")[0]; sugg = `<div class="sugg"><span class="ic bg-refuel">${IC.refuel}</span><div class="tx"><span class="eyebrow">Refuel energy</span><h3>Let's recharge first.</h3><p class="muted small">${c ? `${esc(c.title)} · ${c.sec} seconds at your desk.` : "No movement fits your settings right now."} Or <button class="linkbtn" data-act="start-act" data-type="break_nudge" data-src="battery">rest your eyes</button> (Protect).</p></div>${c ? `<button class="btn lime" data-act="start-act" data-type="move_timer" data-src="battery">Start a ${c.sec}-sec move</button>` : `<button class="btn ghost" data-act="nav" data-to="/refuel">Open Refuel</button>`}</div>`; }
+  else if (st.pillar === "protect") sugg = `<div class="sugg"><span class="ic bg-protect">${IC.protect}</span><div class="tx"><span class="eyebrow">Protect energy</span><h3>Keep the drain low.</h3><p class="muted small">Break nudge: ${esc(nextReminderText("break_nudge"))} · ${habitsToday(me(), "protect").length} break(s) today.</p></div><button class="btn primary" data-act="nav" data-to="/protect" data-sugg="protect">Open Protect</button></div>`;
+  else { const inPeak = cw && nm >= cw[0] && nm < cw[1]; const deep = blocksToday().filter(b => b.kind === "task" && b.taskType === "deep" && b.end > nm).sort((a, b) => a.start - b.start)[0]; sugg = `<div class="sugg"><span class="ic bg-use_well">${IC.use_well}</span><div class="tx"><span class="eyebrow">Use energy well</span><h3>Spend it where it counts.</h3><p class="muted small">${inPeak && deep ? `You're in your strongest window. Start "${esc(deep.title)}".` : deep ? `Next peak focus block: ${esc(deep.title)} at ${hm(deep.start)}.` : "Add an important task and let energy set the order."}</p></div><button class="btn primary" data-act="nav" data-to="/use-well" data-sugg="use_well">Open Use well</button></div>`; }
+  const tasks = S.tasks.filter(t => t.emp === me() && t.date === TODAY);
+  const pc = (p, line1, line2) => `<button class="pcard" data-act="nav" data-to="${PILLARS[p].route}" data-pillar="${p}"><div class="top2">${ptag(p)}<span class="faint">→</span></div><h3>${esc(PILLARS[p].name)}</h3><p class="small">${line1}</p><p class="xs muted">${line2}</p></button>`;
+  const review = S.reviews.find(x => x.emp === me() && x.date === TODAY);
+  return `
+  <div class="phead"><span class="eyebrow">${esc(dayName(TODAY))} · ${esc(S.company.site)} · ${pl.mode === "office" ? "Office day" : "Remote day"}</span><h1>${greet}, ${esc(empName(me()))}.</h1></div>
+  <section class="hero" aria-labelledby="bat-h">
+    ${battery(r, "lg")}
+    <div class="stack" style="gap:10px">
+      <span class="eyebrow">Your energy battery</span>
+      <div class="state" id="bat-h">${r == null ? "How charged are you?" : esc(st.label)}</div>
+      <p class="muted">${r == null ? "Check in to see your battery. One tap, 1 to 5. It comes only from what you tell us; nothing is measured in the background." : `${st.cells} of 5 · "${esc(RATING_LABEL[r])}" at ${hm(logs[logs.length - 1].min)}. ${esc(st.copy)}`}</p>
+      <div class="row"><button class="btn ${r == null ? "primary" : "ghost"}" data-act="checkin">${r == null ? "Check in" : "Check in again"}</button>${logs.length > 1 ? `<span class="xs muted">${logs.length} check-ins today</span>` : ""}</div>
+    </div>
+  </section>
+  ${sugg}
+  ${rest.triggered && !rest.todayReq ? restCard() : ""}
+  <div class="grid g3">
+    ${pc("protect", `${habitsToday(me(), "protect").length} break(s) today`, `Break nudge: ${esc(nextReminderText("break_nudge"))}`)}
+    ${pc("refuel", `${habitsToday(me(), "refuel").length} move(s) today`, `Move timer: ${esc(nextReminderText("move_timer"))}`)}
+    ${pc("use_well", cw ? `Peak window ${hm(cw[0])}–${hm(cw[1])}` : "Peak window not known yet", `Core hours ${hm(S.company.core[0])}–${hm(S.company.core[1])}`)}
+  </div>
+  <div class="grid g2">
+    <div class="card"><span class="eyebrow">Next up</span>${nu ? `<h3>${esc(nu.title)}</h3><p class="muted small num">${hm(nu.start)}–${hm(nu.end)} · ${esc(kindLabel(nu))}</p>` : `<p class="muted">Nothing else scheduled today.</p>`}<button class="linkbtn small" style="align-self:flex-start" data-act="nav" data-to="/use-well">See today's plan</button></div>
+    <div class="card"><span class="eyebrow">Today's goal</span><h3 class="num">${pl.target ?? "No target"} ${pl.target != null ? "important tasks" : ""}</h3><p class="muted small">${tasks.length} on your energy-led plan${pl.locked ? " · target locked after your reflection" : ""}.</p>
+      <div class="divider"></div>
+      <div class="row between"><span class="small"><b>End-of-day reflection</b><br><span class="muted">${review ? "Submitted. You can still revise it." : nm >= pl.end ? "Open now · 4 quick questions" : `Opens at ${hm(pl.end)}`}</span></span><button class="btn ${nm >= pl.end ? "primary" : "quiet"} sm" data-act="review" ${nm >= pl.end ? "" : "disabled"}>${review ? "Revise" : "Reflect"}</button></div></div>
+  </div>`;
+}
+function restCard() {
+  const rest = restState();
+  return `<div class="card soft" style="border-color:var(--amber)"><div class="hd"><div class="stack" style="gap:4px"><span class="eyebrow" style="color:var(--amber)">Protect energy · Rest without explaining</span><h3>3 workdays of low energy. A half-day to recover?</h3><p class="muted small">${rest.left} of ${S.company.allowancePerQuarter} company-funded half-days available this quarter. Approved automatically within policy. Your manager sees the schedule only, never the reason or your scores.</p></div>
+    <button class="btn primary" data-act="rest" ${rest.left > 0 ? "" : "disabled"}>Take a half-day</button></div></div>`;
+}
+
+/* ================= Protect ================= */
+function nudgeCard(type) {
+  const def = REM[type], iv = P().reminders[type], n = habitsToday(me(), def.pillar).length, c = candidates(type);
+  const ame = actionMeetsEnergy();
+  return `<div class="card" id="${type}">
+    <div class="hd"><div class="stack" style="gap:6px">${mchip(def.measure)}<h2>${esc(def.label)}</h2></div>
+      <label class="switch"><input type="checkbox" id="sw-${type}" data-act="rem-toggle" data-type="${type}" ${iv ? "checked" : ""}><span>${iv ? "On" : "Off"}</span></label></div>
+    <div class="grid g3" style="gap:10px">
+      <div class="metric"><span class="xs muted">Interval</span><div class="seg" role="group" aria-label="${esc(def.label)} interval">${def.intervals.filter(Boolean).map(v => `<button aria-pressed="${iv === v}" data-act="rem-interval" data-type="${type}" data-v="${v}">${v} min</button>`).join("")}</div></div>
+      <div class="metric"><span class="xs muted">Next reminder</span><span class="d num">${esc(nextReminderText(type))}</span></div>
+      <div class="metric"><span class="xs muted">Today</span><span class="v num">${n}</span><span class="xs muted">${def.logged}${n === 1 ? "" : "s"} logged</span></div>
+    </div>
+    <div class="row"><button class="btn ${type === "move_timer" ? "lime" : "primary"}" data-act="start-act" data-type="${type}" ${c.length ? "" : "disabled"}>${type === "break_nudge" ? "Take a break now" : "Start a move now"}</button>
+      ${c.length ? `<span class="small muted">Suggested: ${esc(c[0].title)} · ${c[0].sec} sec</span>` : `<span class="small muted">No activity fits your settings and the time before your next fixed block.</span>`}</div>
+    ${type === "break_nudge" ? `<div class="divider"></div><div class="stack" style="gap:4px"><span class="eyebrow plain">Action meets energy</span>${ame.hiV != null && ame.loV != null ? `<p><b>Three or more breaks: afternoon energy ${ame.hiV.toFixed(1)}/5, versus ${ame.loV.toFixed(1)}/5.</b></p><p class="xs muted">${ame.hi} days vs ${ame.lo} days · Descriptive association, not a causal effect.</p>` : `<p class="small muted">${ame.hi} and ${ame.lo} days recorded. Needs at least 3 days in each group.</p>`}</div>` : ""}
+    <p class="xs faint">Timed by the in-app clock while PeakWork is open. Nothing is detected from your screen or posture.</p>
+  </div>`;
+}
+function vProtect() {
+  const rest = restState();
+  return `${pillarHead("protect", [1, 2])}
+  ${rest.triggered && !rest.todayReq ? restCard() : ""}
+  ${nudgeCard("break_nudge")}
+  ${mealPlanner()}
+  <details class="fold card flat"><summary>Rest without explaining · ${rest.left} of ${S.company.allowancePerQuarter} half-days left this quarter</summary><p class="small muted">When your battery is low (2 or below) on 3 workdays in a row, PeakWork offers a company-funded recovery half-day. ${rest.todayReq ? `You took one today (${rest.todayReq.half === "PM" ? "afternoon" : "morning"}, ${dayName(rest.todayReq.date)}). Approved within policy.` : rest.triggered ? "Available now." : "Not triggered right now."}</p></details>`;
+}
+function resCard(r, ev) {
+  const mine = ev.mine, nm = nowMin();
+  const price = r.price == null ? "Price to be confirmed" : r.price === 0 ? "Free" : `S$${ev.cost.toFixed(2)}${S.company.subsidy.on && r.kind === "meal" ? " after subsidy" : ""}`;
+  let act = "";
+  if (mine) {
+    const st = mine.status;
+    const canCancel = st === "confirmed" && nm < r.cancelBy;
+    const canUse = st === "confirmed" && (r.kind === "meal" ? nm >= r.start && nm <= r.end : nm >= r.end);
+    act = `<span class="tag ${st === "completed" ? "ok" : "lime"}">${st === "completed" ? (r.kind === "meal" ? "Picked up" : "Attended") : st === "confirmed" ? (nm > r.end ? "Booked · awaiting confirmation" : "Booked") : esc(st)}</span>
+      ${canUse ? `<button class="btn primary sm" data-act="use" data-id="${mine.id}">${r.kind === "meal" ? "Confirm pickup" : "Confirm I attended"}</button>` : ""}
+      ${canCancel ? `<button class="btn ghost sm" data-act="cancel" data-id="${mine.id}">Cancel</button>` : st === "confirmed" ? `<span class="xs muted">Cancellation closed at ${hm(r.cancelBy)}</span>` : ""}`;
+  } else act = `<button class="btn ${ev.ok ? "primary" : "quiet"} sm" data-act="book" data-id="${r.id}" ${ev.ok ? "" : "disabled"}>${r.kind === "meal" ? "Reserve" : "Book"}</button>`;
+  return `<div class="card ${mine ? "soft" : ""}" style="gap:8px">
+    <div class="hd"><div class="stack" style="gap:2px;min-width:0"><h3>${esc(r.title)}</h3><span class="small muted num">${hm(r.start)}–${hm(r.end)} · ${esc(r.location)} · ${esc(r.provider)}</span></div><span class="tag ${r.price == null ? "warn" : ""}">${esc(price)}</span></div>
+    <div class="row">${ev.ok || mine ? ev.fits.map(f => `<span class="tag ok">✓ ${esc(f)}</span>`).join("") : `<span class="tag bad">${esc(ev.reasons[0].text)}</span>${ev.reasons.length > 1 ? `<span class="xs muted">+${ev.reasons.length - 1} more</span>` : ""}`}
+      <span class="xs muted num">${Math.max(0, ev.left)} of ${r.capacity} ${r.kind === "meal" ? "portions" : "places"} left</span>${r.tags ? r.tags.map(t => `<span class="tag">${esc(t)}</span>`).join("") : `<span class="tag warn">Ingredients unconfirmed</span>`}</div>
+    <div class="row">${act}</div></div>`;
+}
+function mealPlanner() {
+  const meals = S.resources.filter(r => r.kind === "meal").map(r => ({ r, ev: evalResource(r) }));
+  const ok = meals.filter(x => x.ev.ok || x.ev.mine).sort((a, b) => b.ev.softMatch - a.ev.softMatch || (a.ev.cost ?? 999) - (b.ev.cost ?? 999) || a.r.start - b.r.start);
+  const no = meals.filter(x => !x.ev.ok && !x.ev.mine);
+  return `<section class="stack" id="meals" style="gap:12px"><div class="row between"><div class="stack" style="gap:6px">${mchip(2)}<h2>Meal planner</h2><p class="small muted">Lunch at ${esc(S.company.site)} · Budget S$${(P().budget ?? 0).toFixed(2)} · Book by ${hm(S.resources.find(r => r.kind === "meal").bookBy)}. Pickup can overlap your lunch break.</p></div>${S.company.subsidy.on ? `<span class="tag ok">Canteen subsidy S$${S.company.subsidy.amount.toFixed(2)}</span>` : ""}</div>
+    <div class="grid g2">${ok.map(x => resCard(x.r, x.ev)).join("")}</div>
+    ${no.length ? `<details class="fold"><summary>Not available (${no.length})</summary><div class="grid g2">${no.map(x => resCard(x.r, x.ev)).join("")}</div></details>` : ""}</section>`;
+}
+
+/* ================= Refuel ================= */
+function vRefuel() {
+  const cls = S.resources.filter(r => r.kind === "class").map(r => ({ r, ev: evalResource(r) })).sort((a, b) => a.r.start - b.r.start);
+  const shown = UI.availOnly ? cls.filter(x => x.ev.ok || x.ev.mine) : cls;
+  const used = weekExerciseMin();
+  const f = UI.libFilter, pr = P().activity;
+  const lib = TEMPLATES.filter(t => t.status === "published" && t.type === "micro_move").filter(t => (f.pos === "all" || t.positions.includes(f.pos)) && (f.space === "all" || t.space === f.space) && (f.dur === "all" || t.sec <= +f.dur));
+  const fitsMe = t => t.positions.some(p => pr.positions.includes(p)) && (pr.space === "near_desk" || t.space === "at_desk") && t.sec <= pr.maxSec && !t.incompatible.some(x => pr.avoid.includes(x));
+  const seg = (k, opts) => `<div class="seg" role="group">${opts.map(([v, l]) => `<button aria-pressed="${f[k] === v}" data-act="lib" data-k="${k}" data-v="${v}">${l}</button>`).join("")}</div>`;
+  return `${pillarHead("refuel", [3, 4])}
+  ${nudgeCard("move_timer")}
+  <div class="card flat"><div class="hd"><h3>Movement library</h3><span class="xs muted">Your limits: ${esc(pr.positions.join(" / "))} · ${pr.space === "at_desk" ? "at desk" : "near desk"} · up to ${pr.maxSec} sec</span></div>
+    <div class="row">${seg("pos", [["all", "Any posture"], ["seated", "Seated"], ["standing", "Standing"]])}${seg("space", [["all", "Anywhere"], ["at_desk", "At desk"], ["near_desk", "Near desk"]])}${seg("dur", [["all", "Any length"], ["60", "≤ 60 sec"]])}</div>
+    <div class="list">${lib.map(t => `<div class="li"><span class="tm num">${t.sec} sec</span><div class="bd"><b>${esc(t.title)}</b><span class="xs muted">${esc(t.positions.join(" / "))} · ${t.space === "at_desk" ? "at desk" : "near desk"} · Source: ${esc(t.source)}</span></div>${fitsMe(t) ? `<span class="tag ok">Fits your settings</span>` : `<span class="tag">Outside your settings</span>`}</div>`).join("")}</div></div>
+  <section class="stack" id="classes" style="gap:12px">
+    <div class="row between"><div class="stack" style="gap:6px">${mchip(4)}<h2>Class booking</h2><p class="small muted">Movement during work hours, allowed by company policy.</p></div>
+      <div class="stack" style="gap:4px;min-width:180px"><span class="small"><b class="num">${used} of ${S.company.weeklyExerciseMin} min</b> used this week</span><div class="bar" aria-hidden="true"><i style="width:${Math.min(100, used / S.company.weeklyExerciseMin * 100)}%"></i></div></div></div>
+    <label class="switch"><input type="checkbox" id="avail-only" data-act="avail" ${UI.availOnly ? "checked" : ""}><span>Available to book only</span></label>
+    <div class="grid g3">${shown.map(x => resCard(x.r, x.ev)).join("") || `<p class="muted">No sessions you can book right now.</p>`}</div>
+  </section>
+  ${buddyCard()}`;
+}
+function buddyCard() {
+  const pr = P(), mine = S.buddies.filter(b => b.from === me());
+  const nm = nowMin();
+  const matches = S.employees.filter(e => e.id !== me() && S.prefs[e.id].buddyOptIn).slice(0, 3);
+  const slot = [990, 1020].find(s => s > nm) ?? null;
+  return `<div class="card flat"><div class="hd"><div class="stack" style="gap:4px"><span class="eyebrow">Optional</span><h3>Find a lunch or movement buddy</h3><p class="small muted">30 minutes at ${esc(S.company.site)}. Matched on office, free time and shared rhythm preferences. No energy scores are shared.</p></div></div>
+    <label class="switch"><input type="checkbox" id="buddy-opt" data-act="buddy-opt" ${pr.buddyOptIn ? "checked" : ""}><span>I choose to appear in buddy matching</span></label>
+    ${pr.buddyOptIn ? `<div class="list">${matches.map(e => { const inv = mine.find(b => b.to === e.id); return `<div class="li"><span class="avatar" style="width:36px;height:36px;font-size:14px">${esc(e.name[0])}</span><div class="bd"><b>${esc(e.name)}</b><span class="xs muted">${esc(e.team)} · free at ${slot ? hm(slot) : "—"} · also prefers a later rhythm</span></div>${inv ? `<span class="tag ${inv.status === "accepted" ? "ok" : ""}">${inv.status === "accepted" ? "Accepted · in your plan" : "Invite sent"}</span>` : slot ? `<button class="btn ghost sm" data-act="buddy-invite" data-to="${e.id}" data-slot="${slot}">Movement together</button>` : ""}</div>`; }).join("")}</div><p class="xs faint">Invites stay inside this demo. Nothing is sent outside it.</p>` : ""}</div>`;
+}
+
+/* ================= Use well ================= */
+function curveSVG(c, opts = {}) {
+  const W = opts.w || 640, H = opts.h || 220, L = 34, R = 12, T = 14, B = 26;
+  const x = m => L + (m - 540) / (1080 - 540) * (W - L - R), y = v => T + (5 - v) / 4 * (H - T - B);
+  let segs = [], cur = [];
+  c.pts.forEach(p => { if (p.v == null) { if (cur.length) segs.push(cur); cur = []; } else cur.push(p); }); if (cur.length) segs.push(cur);
+  const path = s => s.map((p, i) => `${i ? "L" : "M"}${x(p.tp).toFixed(1)},${y(p.v).toFixed(1)}`).join("");
+  const illus = [3.8, 3.6, 3.3, 3.0, 2.8, 2.4];
+  const win = c.win;
+  const nowX = x(clamp(nowMin(), 540, 1080));
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Energy by check-in time. ${c.pts.map(p => `${hm(p.tp)}: ${p.v == null ? "not enough days" : p.v.toFixed(1)}`).join("; ")}">
+    ${win ? `<rect x="${x(win[0])}" y="${T}" width="${x(win[1]) - x(win[0])}" height="${H - T - B}" fill="var(--lime)" opacity=".28" rx="6"/>${opts.mini ? "" : `<text x="${(x(win[0]) + x(win[1])) / 2}" y="${T + 12}" text-anchor="middle" style="font-weight:700;fill:var(--deep)">Strongest ${hm(win[0])}–${hm(win[1])}</text>`}` : ""}
+    <g class="grid">${[1, 2, 3, 4, 5].map(v => `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}"/><text x="${L - 8}" y="${y(v) + 4}" text-anchor="end">${v}</text>`).join("")}</g>
+    ${[540, 660, 780, 900, 1020].map(m => `<text x="${x(m)}" y="${H - 6}" text-anchor="middle">${hm(m)}</text>`).join("")}
+    ${opts.mini ? "" : `<line x1="${nowX}" x2="${nowX}" y1="${T}" y2="${H - B}" stroke="var(--danger)" stroke-dasharray="3 3"/>`}
+    ${UI.showIllustrative && !opts.mini ? `<path d="${illus.map((v, i) => `${i ? "L" : "M"}${x(TPS[i])},${y(v)}`).join("")}" fill="none" stroke="var(--faint)" stroke-width="2" stroke-dasharray="6 5"/>` : ""}
+    ${segs.map(s => `<path d="${path(s)}" fill="none" stroke="var(--green)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>`).join("")}
+    ${c.pts.map(p => p.v == null ? `<circle cx="${x(p.tp)}" cy="${y(1.2)}" r="4" fill="var(--card)" stroke="var(--faint)" stroke-width="1.5"/>` : `<circle cx="${x(p.tp)}" cy="${y(p.v)}" r="5" fill="var(--green)" stroke="var(--card)" stroke-width="2"/>`).join("")}
+  </svg>`;
+}
+function dayCalendar(preview) {
+  const pl = plan(), s0 = Math.min(pl.start, 540) - 0, s1 = Math.max(pl.end, 1080);
+  const ppm = 0.9, top = m => (m - s0) * ppm;
+  const blocks = blocksToday().filter(b => !(b.kind === "task" && b.system && preview));
+  const pv = preview ? preview.items.filter(i => i.start != null).map(i => ({ kind: "task", taskType: i.type, start: i.start, end: i.end, title: i.title, preview: true })) : [];
+  const hrs = []; for (let h = Math.ceil(s0 / 60) * 60; h <= s1; h += 60) hrs.push(h);
+  const core = S.company.core, nm = nowMin();
+  const cls = b => b.kind === "task" ? (b.taskType === "deep" ? "deep" : b.taskType === "collab" ? "collab" : "light") : b.kind;
+  return `<div class="daycal" style="height:${(s1 - s0) * ppm}px" aria-label="Today's plan">
+    ${hrs.map(h => `<div class="hr" style="top:${top(h)}px"><span>${hm(h)}</span></div>`).join("")}
+    <div class="core" style="top:${top(core[0])}px;height:${(core[1] - core[0]) * ppm}px" title="Core collaboration window"></div>
+    ${[...blocks, ...pv].map(b => `<div class="blk ${cls(b)} ${b.preview ? "preview" : ""}" style="top:${top(b.start) + 1}px;height:${Math.max(18, (b.end - b.start) * ppm - 2)}px"><span class="num">${hm(b.start)}</span><span>${esc(b.title)}${b.preview ? " · preview" : ""}</span></div>`).join("")}
+    ${nm >= s0 && nm <= s1 ? `<div class="now" style="top:${top(nm)}px" aria-label="Now ${hm(nm)}"></div>` : ""}
+  </div>`;
+}
+function vUseWell() {
+  const c = curve(), pv = buildPreview(), applied = appliedSig(), upToDate = pv.sig === applied;
+  const r = latestRating(), pl = plan(), pr = P();
+  const tasks = S.tasks.filter(t => t.emp === me() && t.date === TODAY).sort((a, b) => a.order - b.order);
+  const dt = UI.draftTask;
+  const typeName = { deep: "Deep work", routine: "Routine replies", collab: "Collaboration" };
+  const lab = { deep: "DEEP", routine: "LIGHT", collab: "COLLAB" };
+  const fs = UI.flexStart ?? pr.start, fEnd = fs + pr.paidMin + pr.lunchMin;
+  const flexCheck = flexImpact(fs);
+  const rc = S.rhythmCards[me()], rd = UI.rcDraft || rc;
+  const pattern = pr.pattern;
+  const week = ["2026-10-19", "2026-10-20", "2026-10-21", "2026-10-22", "2026-10-23"];
+  return `${pillarHead("use_well", [5, 6, 7])}
+  <div class="card" id="curve">
+    <div class="hd"><div class="stack" style="gap:6px">${mchip(5)}<h2>Your peak does not start at nine.</h2><p class="small muted">Patterns from ${c.recordedDays} recorded days · Recent lows remain visible</p></div>
+      <label class="switch"><input type="checkbox" id="illus" data-act="illus" ${UI.showIllustrative ? "checked" : ""}><span>Illustrative morning rhythm</span></label></div>
+    ${curveSVG(c)}
+    <div class="legend"><span><i style="background:var(--green)"></i>Your average, 1–5 self-report</span>${UI.showIllustrative ? `<span><i style="background:repeating-linear-gradient(90deg,var(--faint) 0 5px,transparent 5px 9px)"></i>Illustrative morning rhythm, not another employee or a standard</span>` : ""}<span><i style="background:var(--faint);height:8px;width:8px;border-radius:50%"></i>Fewer than 3 days, line breaks</span></div>
+    <p><b>${c.win ? `Your strongest recorded window: ${hm(c.win[0])}–${hm(c.win[1])}.` : "Not enough check-ins to show a strongest window yet."}</b> <span class="xs muted">Synthetic demo records · 1–5 self-report, not a medical chronotype</span></p>
+    <details class="fold"><summary>Show as table</summary><div class="tblwrap"><table class="tbl"><tr><th>Check-in time</th>${c.pts.map(p => `<th class="num">${hm(p.tp)}</th>`).join("")}</tr><tr><td>Average</td>${c.pts.map(p => `<td class="num">${p.v == null ? "—" : p.v.toFixed(1)}</td>`).join("")}</tr><tr><td>Days</td>${c.pts.map(p => `<td class="num">${p.n}</td>`).join("")}</tr></table></div></details>
+  </div>
+  <div class="grid g-plan" id="plan">
+    <div class="card">
+      <span class="eyebrow">Let energy set the order</span><h2>Your tasks, in the right windows.</h2>
+      ${r != null && r <= 2 ? `<div class="tag warn" style="white-space:normal">Low battery — consider a lighter plan</div>` : ""}
+      <form class="stack" data-form="addtask" style="gap:10px">
+        <label class="f" for="task-title">Add an important task…<input type="text" id="task-title" maxlength="80" placeholder="e.g. Write the pilot summary" value="${esc(dt.title)}" data-bind="draftTask.title"></label>
+        <div class="row"><div class="seg" role="group" aria-label="Task type">${Object.entries(typeName).map(([k, v]) => `<button type="button" aria-pressed="${dt.type === k}" data-act="dt" data-k="type" data-v="${k}">${v}</button>`).join("")}</div></div>
+        <div class="row"><div class="seg" role="group" aria-label="Duration">${[15, 30, 45, 60].map(v => `<button type="button" aria-pressed="${dt.dur === v}" data-act="dt" data-k="dur" data-v="${v}">${v} min</button>`).join("")}</div><button class="btn primary sm" type="submit">Add task</button></div>
+      </form>
+      <div class="list">${pv.items.map(i => `<div class="li"><span class="tm num">${i.start == null ? "—" : `${hm(i.start)}–${hm(i.end)}`}</span><div class="bd"><b>${esc(i.title)}</b><span class="xs muted"><span class="tag ${i.type === "deep" ? "ink" : i.type === "collab" ? "ok" : "lime"}" style="padding:1px 8px">${lab[i.type]}</span> ${esc(i.reason)}</span></div><button class="xbtn" style="width:36px;height:36px;font-size:16px" data-act="rm-task" data-id="${i.taskId}" aria-label="Remove ${esc(i.title)}">×</button></div>`).join("") || `<p class="muted small">Add a task to see where it fits.</p>`}</div>
+      <p class="xs muted">${pv.basis === "history" ? `Based on ${c.recordedDays} recorded days.` : "Based on your preferences."} Fixed meetings, lunch and confirmed bookings stay put. This is a preview. Confirm to replace system-generated task blocks; manual focus and meetings will not move.</p>
+      <div class="row"><button class="btn lime" data-act="apply-plan" ${upToDate || !pv.items.length ? "disabled" : ""}>${upToDate ? "Plan is up to date" : "Apply energy-led plan"}</button>${!upToDate ? `<span class="small muted">${pv.moved} block(s) will change</span>` : ""}</div>
+    </div>
+    <div class="card"><div class="hd"><h3>Today</h3><span class="xs muted"><span style="display:inline-block;width:10px;height:10px;background:var(--lime);border-radius:2px"></span> Core hours</span></div>${dayCalendar(upToDate ? null : pv)}</div>
+  </div>
+  <div class="grid g2">
+    <div class="card" id="core">
+      ${mchip(6)}<h2>Clear boundaries. A better rhythm.</h2>
+      <p class="small muted">Stay connected during core hours. Make space for focus and recovery around them.</p>
+      <div class="tag lime" style="align-self:flex-start">Core collaboration window ${hm(S.company.core[0])}–${hm(S.company.core[1])}</div>
+      <div class="tblwrap"><div class="week" style="min-width:360px">
+        <span></span>${week.map(d => `<span class="h">${dayName(d).split(",")[0].split(" ")[0]}<small>${pattern[weekdayIdx(d)] === "office" ? "Office" : "Remote"}</small></span>`).join("")}
+        ${[480, 540, 600, 660, 720, 780, 840, 900, 960, 1020, 1080].map(m => `<span class="t num">${hm(m)}</span>${week.map(() => `<span class="c ${m >= S.company.core[0] && m < S.company.core[1] ? "core" : m >= pr.start && m < pr.start + pr.paidMin + pr.lunchMin ? "" : "off"}"></span>`).join("")}`).join("")}
+      </div></div>
+      <p class="xs faint">Set by team policy. Read-only in this version.</p>
+    </div>
+    <div class="card" id="flex">
+      ${mchip(7)}<h2>Workday settings</h2><p class="small muted">Freedom with structure: move your day, as long as it covers core hours.</p>
+      <dl class="grid g2" style="margin:0;gap:8px">
+        <div><dt class="xs muted">Start work</dt><dd class="d num" style="margin:0;font-weight:700">${hm(pr.start)}</dd></div>
+        <div><dt class="xs muted">Finish work</dt><dd class="d num" style="margin:0;font-weight:700">${hm(pr.start + pr.paidMin + pr.lunchMin)}</dd></div>
+        <div><dt class="xs muted">Core hours</dt><dd style="margin:0;font-weight:700">${hm(S.company.core[0])}–${hm(S.company.core[1])}</dd></div>
+        <div><dt class="xs muted">Weekly work pattern</dt><dd style="margin:0;font-weight:700">3 office + 2 remote</dd></div>
+      </dl>
+      <label class="f" for="flex-start">Adjust start time<select id="flex-start" data-act="flex-pick">${S.company.startOptions.map(o => `<option value="${o}" ${o === fs ? "selected" : ""}>${hm(o)} → finish ${hm(o + pr.paidMin + pr.lunchMin)}</option>`).join("")}</select></label>
+      ${fs !== pr.start ? `<div class="stack small" style="gap:4px">${flexCheck.error ? `<p class="err" role="alert">${esc(flexCheck.error)}</p>` : `<p><b>Preview:</b> ${hm(fs)}–${hm(fEnd)}.</p>`}${flexCheck.notes.map(n => `<p class="muted">• ${esc(n)}</p>`).join("")}</div>` : ""}
+      <label class="switch"><input type="checkbox" id="follow" data-act="follow" ${pr.followEnergy ? "checked" : ""}><span>Follow my energy when work hours change</span></label>
+      <div class="row"><button class="btn primary sm" data-act="flex-save" ${fs === pr.start || flexCheck.error ? "disabled" : ""}>Save start time</button>${fs !== pr.start ? `<button class="btn ghost sm" data-act="flex-reset">Discard</button>` : ""}</div>
+      <p class="xs faint">Office days are set by team policy (Mon, Tue, Thu office).</p>
+    </div>
+  </div>
+  <div class="card" id="rhythm">
+    <div class="stack" style="gap:6px">${mchip(7, false)}<h2>A small card. A better agreement.</h2><p class="small muted">Share how you work best. No raw scores or low-energy history.</p></div>
+    <div class="grid g2">
+      <div class="stack" style="gap:12px">
+        <label class="f" for="rc-rhythm">Rhythm preference<select id="rc-rhythm" data-act="rc" data-k="rhythm">${["Earlier rhythm", "In between", "Later rhythm"].map(v => `<option ${rd.rhythm === v ? "selected" : ""}>${v}</option>`).join("")}</select></label>
+        <div class="f"><span>Best time for deep discussion</span><div class="seg" role="group">${["Morning", "Afternoon"].map(v => `<button aria-pressed="${rd.deepTime === v}" data-act="rc" data-k="deepTime" data-v="${v}">${v}</button>`).join("")}</div></div>
+        <div class="f"><span>I usually reply to messages within</span><div class="seg" role="group">${[15, 30, 60, 120].map(v => `<button aria-pressed="${rd.reply === v}" data-act="rc" data-k="reply" data-v="${v}">${v} min</button>`).join("")}</div></div>
+        <label class="switch"><input type="checkbox" id="rc-show" data-act="rc-show" ${rc.show ? "checked" : ""}><span>Show this card on my demo profile</span></label>
+        <div class="row"><button class="btn primary sm" data-act="rc-update">Update my card</button><button class="btn ghost sm" data-act="rc-copy" ${rc.updated && !UI.rcDraft ? "" : "disabled"}>Copy card text</button></div>
+        <p class="xs muted">Copy only after reviewing the card. Reply time is what you state, not something PeakWork tracks.</p>
+      </div>
+      <div class="rhythm-card" aria-label="Working-rhythm card preview">
+        <div class="row between"><b style="font-family:var(--f-display)">${esc(empName(me()))} · Working rhythm</b>${battery(4, "sm")}</div>
+        <dl><dt>Rhythm</dt><dd>${esc(rd.rhythm)}</dd><dt>Strongest window</dt><dd>${c.win ? `${hm(c.win[0])}–${hm(c.win[1])}` : "Not set"}</dd><dt>Deep discussion</dt><dd>${esc(rd.deepTime)}</dd><dt>Replies within</dt><dd>${rd.reply} min</dd><dt>Core hours</dt><dd>${hm(S.company.core[0])}–${hm(S.company.core[1])}</dd></dl>
+        <p class="xs" style="opacity:.7">A conversation starter, not a performance promise.</p>
+        <p class="xs" style="opacity:.6">${UI.rcDraft ? "Unsaved changes. Update to export." : rc.updated ? "Reviewed and up to date." : "Not reviewed yet."}</p>
+      </div>
+    </div>
+  </div>`;
+}
+function flexImpact(start, emp = me()) {
+  const pr = P(emp), end = start + pr.paidMin + pr.lunchMin, core = S.company.core, notes = [];
+  if (start > core[0] || end < core[1]) return { error: `Your day must cover core hours ${hm(core[0])}–${hm(core[1])}.`, notes };
+  const pl = plan(emp);
+  const bk = blocksToday(emp).find(b => b.kind === "booking" && !b.online && (b.start < start || b.end > end));
+  if (bk) return { error: `Your booking "${bk.title}" (${hm(bk.start)}–${hm(bk.end)}) falls outside ${hm(start)}–${hm(end)}. Cancel it first.`, notes, locate: "classes" };
+  if (pl.lunch[0] < start || pl.lunch[1] > end) return { error: "Your lunch break would fall outside your workday.", notes };
+  const man = S.blocks.find(b => b.emp === emp && b.date === TODAY && b.kind === "focus" && (b.start < start || b.end > end));
+  if (man) return { error: `Your focus block "${man.title}" falls outside the new hours.`, notes };
+  S.blocks.filter(b => b.emp === emp && b.date === TODAY && b.kind === "meeting" && (b.start < start || b.end > end)).forEach(b => notes.push(`"${b.title}" stays at ${hm(b.start)} even though it is outside your hours.`));
+  const sys = S.blocks.filter(b => b.emp === emp && b.date === TODAY && b.kind === "task" && b.system && (b.start < start || b.end > end));
+  if (sys.length) notes.push(pr.followEnergy ? `${sys.length} task block(s) will be re-planned around your energy.` : `${sys.length} task block(s) fall outside and will be re-planned.`);
+  notes.push("Fixed meetings, lunch and bookings do not move.");
+  return { error: null, notes };
+}
+
+/* ================= Report ================= */
+function vReport() {
+  const ame = actionMeetsEnergy();
+  const [A, B] = UI.swap ? [COMPARISON, BASELINE] : [BASELINE, COMPARISON];
+  const lab = d => `${dayName(d[0]).replace(/^\w+, /, "")}–${dayName(d[4]).replace(/^\w+, /, "")}`;
+  const cards = METRICS.map(m => { const a = periodVals(me(), A, m.key), b = periodVals(me(), B, m.key); return { m, a, b }; });
+  const fmtV = (m, v) => v == null ? "—" : m.unit === "%" ? `${Math.round(v)}%` : `${v.toFixed(1)}/5`;
+  const pulses = S.pulses.filter(p => p.emp === me());
+  const h = S.habits.filter(x => x.emp === me()).map(x => ({ date: x.date, min: x.min, pillar: x.pillar, title: x.title, sub: `${x.sec} sec`, k: "h" }));
+  const bk = S.bookings.filter(b => b.emp === me() && b.status === "completed").map(b => ({ date: b.date, min: b.snapshot.start, pillar: b.pillar, title: b.snapshot.title, sub: b.kind === "meal" ? "Meal picked up" : "Class attended", k: "b" }));
+  const ap = S.planApplies.filter(a => a.emp === me()).map(a => ({ date: a.date, min: 540, pillar: "use_well", title: "Applied energy-led plan", sub: "Peak scheduling", k: "p" }));
+  const log = [...h, ...bk, ...ap].sort((a, b) => b.date.localeCompare(a.date) || b.min - a.min);
+  const byDate = {}; log.forEach(l => (byDate[l.date] ||= []).push(l));
+  const fri = S.reviews.find(x => x.emp === me() && x.date === TODAY);
+  return `<div class="phead"><span class="eyebrow">Energy report</span><h1>Clues for next week.</h1><p class="sub">There is no overall score to chase. Each number here comes from your own check-ins and reflections.</p></div>
+  <div class="card soft" id="ame">
+    <span class="eyebrow">Action meets energy</span>
+    ${ame.hiV != null && ame.loV != null ? `<h2>Three or more breaks: afternoon energy ${ame.hiV.toFixed(1)}/5, versus ${ame.loV.toFixed(1)}/5.</h2>
+      <div class="stack" style="gap:8px;max-width:560px">${[["3+ confirmed actions before your afternoon check-in", ame.hiV, ame.hi], ["Other days", ame.loV, ame.lo]].map(([l, v, n]) => `<div class="stack" style="gap:3px"><div class="row between small"><span>${l}</span><b class="num">${v.toFixed(1)}/5 · ${n} days</b></div><div class="bar" style="height:12px"><i style="width:${(v / 5) * 100}%;background:${l.startsWith("3") ? "var(--green)" : "var(--faint)"}"></i></div></div>`).join("")}</div>
+      <p class="xs muted">Across ${ame.days} recorded workdays. Descriptive association, not a causal effect.</p>`
+    : `<p class="muted">${ame.hi} and ${ame.lo} days recorded. Each group needs at least 3 days before a number is shown.</p>`}
+  </div>
+  <div class="row between"><div class="stack" style="gap:2px"><h2>Before and after</h2><p class="small muted">Before: ${lab(A)} · After: ${lab(B)} · each needs 3+ valid days</p></div><button class="btn ghost sm" data-act="swap">Swap periods</button></div>
+  <div class="grid g3">${cards.map(({ m, a, b }) => { const d = a.v != null && b.v != null ? b.v - a.v : null; const good = d != null && d * m.dir > 0; return `<div class="card metric"><span class="small muted">${esc(m.label)}</span>
+    ${a.v != null && b.v != null ? `<div class="row" style="align-items:baseline"><span class="v num">${fmtV(m, b.v)}</span><span class="d num ${d === 0 ? "" : good ? "up" : "down"}">${d > 0 ? "+" : ""}${m.unit === "%" ? Math.round(d) + " pts" : d.toFixed(1)}</span></div><span class="xs muted num">Before ${fmtV(m, a.v)} · ${a.n} vs ${b.n} days${m.dir < 0 ? " · lower is better" : ""}</span>` : `<span class="d muted">Not enough days yet</span><span class="xs muted">${a.n} and ${b.n} valid days · needs 3 each</span>`}
+    <span class="xs faint">${esc(m.src)}</span></div>`; }).join("")}</div>
+  <div class="grid g2">
+    <div class="card"><div class="hd"><h3>Energy by check-in time</h3><button class="linkbtn small" data-act="nav" data-to="/use-well" data-anchor="curve">Full view in Use well</button></div>${curveSVG(curve(), { mini: true, h: 150 })}</div>
+    <div class="card" id="weekly"><span class="eyebrow">Weekly reflection</span>
+      <div class="list">${pulses.map(p => `<div class="li"><span class="tm">Week of ${dayName(p.week).replace(/^\w+, /, "")}</span><div class="bd small">Work–life balance <b class="num" style="display:inline">${p.wlb}/5</b> · Would recommend employer <b class="num" style="display:inline">${p.recommend}/5</b></div></div>`).join("")}
+      <div class="li"><span class="tm">This week</span><div class="bd small muted">Opens Fri 23 Oct after ${hm(plan().end)}.</div><button class="btn quiet sm" disabled>Reflect</button></div></div>
+      <div class="divider"></div>
+      <div class="row between small"><span>Today's reflection: ${fri ? "submitted" : nowMin() >= plan().end ? "open now" : `opens ${hm(plan().end)}`}</span><button class="btn ${nowMin() >= plan().end ? "primary" : "quiet"} sm" data-act="review" ${nowMin() >= plan().end ? "" : "disabled"}>${fri ? "Revise" : "Reflect"}</button></div></div>
+  </div>
+  <div class="card" id="log"><div class="hd"><h3>Action log</h3><div class="row">${ptag("protect")}${ptag("refuel")}${ptag("use_well")}</div></div>
+    ${Object.entries(byDate).slice(0, 6).map(([d, items]) => `<div class="stack" style="gap:0"><span class="xs muted" style="font-weight:700;padding-top:8px">${d === TODAY ? "Today" : dayName(d)} · ${items.length}</span><div class="list">${items.map(l => `<div class="li"><span class="tm num">${hm(l.min)}</span><div class="bd"><b>${esc(l.title)}</b><span class="xs muted">${esc(l.sub)}</span></div>${ptag(l.pillar)}</div>`).join("")}</div></div>`).join("")}
+    <p class="xs faint">${log.length} actions in total. Bookings and short actions are listed separately, never double-counted.</p></div>`;
+}
+
+/* ================= Settings ================= */
+function vSettings() {
+  const pr = P(), a = pr.activity;
+  const chk = (name, v, on, label) => `<label><input type="checkbox" name="${name}" value="${v}" ${on ? "checked" : ""}><span>${label}</span></label>`;
+  return `<div class="phead"><span class="eyebrow">Preferences</span><h1>Make PeakWork fit you.</h1><p class="sub">Only you see these. Your manager never sees your settings, limits or scores.</p></div>
+  <form class="stack" data-form="settings" style="gap:16px">
+  <div class="grid g2">
+    <div class="card"><h3>Workday</h3>
+      <label class="f" for="s-target">Daily target (important tasks, 1–20, optional)<input type="number" id="s-target" name="target" min="1" max="20" value="${pr.target ?? ""}" ${plan().locked ? "disabled" : ""}></label>
+      ${plan().locked ? `<p class="xs muted">Locked after today's reflection.</p>` : ""}
+      <label class="f" for="s-focus">Preferred focus window<select id="s-focus" name="focus">${[[540, 660], [600, 720], [660, 780], [780, 900], [840, 960]].map(w => `<option value="${w}" ${w[0] === pr.focusWindow[0] ? "selected" : ""}>${hm(w[0])}–${hm(w[1])}</option>`).join("")}</select></label>
+    </div>
+    <div class="card"><h3>Food</h3>
+      <label class="f" for="s-budget">Meal budget (S$, empty for none)<input type="number" id="s-budget" name="budget" min="0" step="0.5" value="${pr.budget ?? ""}"></label>
+      <div class="f"><span>Preferences (soft)</span><div class="seg">${["vegetarian", "high-fibre", "high-protein"].map(t => chk("soft", t, pr.softTags.includes(t), t)).join("")}</div></div>
+      <div class="f"><span>Requirements (strict)</span><div class="seg">${["vegetarian", "halal", "no-nuts"].map(t => chk("strict", t, pr.strictTags.includes(t), t)).join("")}</div></div>
+    </div>
+    <div class="card"><h3>Movement limits</h3>
+      <div class="f"><span>Postures I can do</span><div class="seg">${chk("pos", "seated", a.positions.includes("seated"), "Seated")}${chk("pos", "standing", a.positions.includes("standing"), "Standing")}</div></div>
+      <label class="f" for="s-space">Space<select id="s-space" name="space"><option value="at_desk" ${a.space === "at_desk" ? "selected" : ""}>At my desk</option><option value="near_desk" ${a.space === "near_desk" ? "selected" : ""}>Near my desk</option></select></label>
+      <label class="f" for="s-max">Longest activity<select id="s-max" name="max">${[20, 60, 120, 300].map(v => `<option value="${v}" ${a.maxSec === v ? "selected" : ""}>${v} sec</option>`).join("")}</select></label>
+      <div class="f"><span>Avoid</span><div class="seg">${["knee", "back", "shoulder"].map(t => chk("avoid", t, a.avoid.includes(t), t)).join("")}</div></div>
+      <div class="f"><span>Equipment</span><div class="seg">${chk("eq", "stable_chair", a.equipment.includes("stable_chair"), "Stable chair")}</div></div>
+    </div>
+    <div class="card"><h3>Reminders</h3>
+      ${Object.entries(REM).map(([t, d]) => `<label class="f" for="s-${t}">${M(d.measure).id} ${esc(d.label)}<select id="s-${t}" name="${t}">${d.intervals.map(v => `<option value="${v}" ${pr.reminders[t] === v ? "selected" : ""}>${v ? `Every ${v} min` : "Off"}</option>`).join("")}</select></label>`).join("")}
+      <p class="xs muted">Reminders never appear during meetings or protected focus. They wait until the block ends.</p>
+    </div>
+  </div>
+  <p class="err" id="settings-err" role="alert"></p>
+  <div class="row"><button class="btn primary" type="submit">Save preferences</button><button class="btn ghost" type="button" data-act="onboard">Replay "Meet your energy rhythm"</button></div>
+  </form>`;
+}
+
+/* ================= Manager ================= */
+function mgrHead(title, sub) { return `<div class="phead"><span class="eyebrow">Workplace insights · ${esc(S.company.team)}</span><h1>${esc(title)}</h1><p class="sub">${sub}</p></div>`; }
+function vOutcomes() {
+  const tr = teamRhythm(), peak = tr.filter(t => t.v != null).sort((a, b) => b.v - a.v)[0];
+  const ms = [["perf", "Work effectiveness", "/5", 1], ["completion", "Task completion", "%", 1], ["fatigue", "Fatigue", "/5", -1], ["wlb", "Work–life balance", "/5", 1]];
+  const res = ms.map(([k, l, u, dir]) => ({ k, l, u, dir, ...teamMetric(k) }));
+  const rec = teamMetric("recommend"), loop = weeklyLoop(COMPARISON), loopA = weeklyLoop(BASELINE);
+  const fmt = (u, v) => v == null ? "—" : u === "%" ? Math.round(v) + "%" : v.toFixed(1);
+  const heatBg = v => v == null ? "var(--card2)" : `color-mix(in srgb, var(--lime) ${Math.round(((v - 2) / 2.2) * 100)}%, var(--card2))`;
+  const usage = pillarUsage([...BASELINE, ...COMPARISON, "2026-10-19", TODAY]);
+  const all = S.bookings.filter(b => b.date === TODAY && b.resId && ["confirmed", "completed", "no_show"].includes(b.status));
+  const dumb = [["perf", "Work effectiveness"], ["wellbeing", "Wellbeing"], ["health", "Health feeling"], ["energy", "Average energy"], ["fatigue", "Fatigue (lower is better)"]].map(([k, l]) => ({ l, ...teamMetric(k) }));
+  return `${mgrHead("Two-week pilot observation", `Baseline 5–9 Oct · Comparison 12–16 Oct · ${S.employees.length} fictional employees. Team results only, each shown when at least 5 people qualify.`)}
+  <div class="card" id="rhythm-team"><div class="hd"><div class="stack" style="gap:4px"><span class="eyebrow">Team rhythm</span><h2>The team peaks around ${peak ? hm(peak.tp) : "—"}.</h2></div><span class="tag">One team row · no individual rows</span></div>
+    <div class="tblwrap"><div class="heat" style="min-width:420px">${tr.map(t => `<div style="background:${heatBg(t.v)}"><small>${hm(t.tp)}</small><span class="num">${t.v == null ? "—" : t.v.toFixed(1)}</span><small class="faint">${t.n} people</small></div>`).join("")}</div></div>
+    <p class="small"><b>Suggestion:</b> hold stand-up at 11:00–11:30, inside core hours and just before the shared peak. <span class="muted">A proposal, not an automatic meeting move.</span></p>
+    <p class="xs faint">Average self-reported energy by check-in time. Each cell needs 5+ employees with 3+ days of records.</p></div>
+  <div class="grid g4">${res.map(r => { const d = r.ready ? r.b - r.a : null; const good = d != null && d * r.dir > 0; return `<div class="card metric"><span class="small muted">${esc(r.l)}</span>${r.ready ? `<div class="row" style="align-items:baseline"><span class="v num">${fmt(r.u, r.b)}${r.u === "%" ? "" : `<span class="small muted">/5</span>`}</span><span class="d num ${good ? "up" : "down"}">${d > 0 ? "+" : ""}${r.u === "%" ? Math.round(d) + " pts" : d.toFixed(1)}</span></div><span class="xs muted">Baseline ${fmt(r.u, r.a)} · ${r.n} paired employees</span>` : `<span class="d muted">Not enough paired employees</span><span class="xs muted">${r.n} of 5 needed</span>`}</div>`; }).join("")}</div>
+  <div class="grid g2">
+    <div class="card"><h3>Where are things changing?</h3>${dumbbell(dumb)}<p class="xs faint">Paired employees, equal weight. Descriptive before and after, not a causal effect.</p></div>
+    <div class="stack" style="gap:16px">
+      <div class="card"><span class="eyebrow">The energy-management loop</span><div class="row" style="align-items:baseline"><span class="metric"><span class="v num">${loop.n}/${loop.of}</span></span><span class="d num">${(loop.n / loop.of * 100).toFixed(1)}%</span><span class="small muted">baseline week ${loopA.n}/${loopA.of}</span></div><p class="small muted">Employees with 3+ complete days in the comparison week: check-in, plan, one action and a reflection. A decline in participation deserves attention, too.</p></div>
+      <div class="card"><span class="eyebrow">Employer experience</span>${rec.ready ? `<div class="row" style="align-items:baseline"><span class="metric"><span class="v num">${rec.b.toFixed(1)}/5</span></span><span class="d num ${rec.b >= rec.a ? "up" : "down"}">${rec.b - rec.a >= 0 ? "+" : ""}${(rec.b - rec.a).toFixed(1)}</span><span class="small muted">${rec.n} paired</span></div>` : `<p class="muted">Not enough paired employees.</p>`}<p class="xs muted">Would recommend this employer, weekly reflection 1–5. It does not measure actual retention or external employer brand.</p></div>
+    </div>
+  </div>
+  <div class="grid g2">
+    <div class="card"><h3>How support is used</h3><div class="grid g3" style="gap:10px">
+      <div class="metric"><span class="v num">${S.habits.length}</span><span class="xs muted">confirmed short activities</span></div>
+      <div class="metric"><span class="v num">${all.length}</span><span class="xs muted">active bookings today</span></div>
+      <div class="metric"><span class="v num">${S.bookings.filter(b => b.status === "completed").length}</span><span class="xs muted">confirmed uses</span></div></div>
+      <button class="linkbtn small" style="align-self:flex-start" data-act="nav" data-to="/admin/resources">Manage resources</button></div>
+    <div class="card"><h3>Approved time off</h3>${S.rest.length ? `<div class="list">${S.rest.map(r => `<div class="li"><span class="tm">${esc(dayName(r.date))}</span><div class="bd"><b>${esc(empName(r.emp))}</b><span class="xs muted">${r.half === "PM" ? "Afternoon" : "Morning"} · company recovery half-day</span></div><span class="tag ok">Approved</span></div>`).join("")}</div>` : `<p class="muted small">None this quarter.</p>`}
+      <p class="xs muted">Scheduling information only. Reasons and energy data are never shared. Company recovery allowance: ${S.company.allowancePerQuarter} half-days per person per quarter.</p></div>
+  </div>`;
+}
+function dumbbell(rows) {
+  const W = 520, rowH = 36, L = 160, R = 20, H = rows.length * rowH + 30;
+  const x = v => L + (v - 1) / 4 * (W - L - R);
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${rows.map(r => `${r.l}: ${r.ready ? `${r.a.toFixed(1)} to ${r.b.toFixed(1)}` : "not enough data"}`).join("; ")}">
+    ${[1, 2, 3, 4, 5].map(v => `<line x1="${x(v)}" x2="${x(v)}" y1="4" y2="${H - 22}" stroke="var(--line)"/><text x="${x(v)}" y="${H - 6}" text-anchor="middle">${v}</text>`).join("")}
+    ${rows.map((r, i) => { const yy = 20 + i * rowH; return `<text x="0" y="${yy + 4}" style="fill:var(--ink);font-size:12.5px">${esc(r.l)}</text>${r.ready ? `<line x1="${x(r.a)}" x2="${x(r.b)}" y1="${yy}" y2="${yy}" stroke="var(--line2)" stroke-width="6" stroke-linecap="round"/><circle cx="${x(r.a)}" cy="${yy}" r="6" fill="var(--faint)"/><circle cx="${x(r.b)}" cy="${yy}" r="7" fill="var(--green)"/>` : `<text x="${L}" y="${yy + 4}">Not enough paired employees</text>`}`; }).join("")}
+  </svg><div class="legend"><span><i style="background:var(--faint);height:8px;width:8px;border-radius:50%"></i>Baseline 5–9 Oct</span><span><i style="background:var(--green);height:8px;width:8px;border-radius:50%"></i>Comparison 12–16 Oct</span></div>`;
+}
+function vParticipation() {
+  const weeks = [["Baseline 5–9 Oct", BASELINE], ["Comparison 12–16 Oct", COMPARISON], ["This week 19–20 Oct", ["2026-10-19", TODAY]]];
+  const cur = pillarUsage([...BASELINE, ...COMPARISON, "2026-10-19", TODAY]);
+  const today = pillarUsage([TODAY]);
+  const mrow = (id, val) => `<div class="li"><span>${mchip(id)}</span><span class="bd"></span><b class="num">${val}</b></div>`;
+  const hm1 = S.habits.filter(h => h.pillar === "protect").length, mv = S.habits.filter(h => h.pillar === "refuel").length;
+  const meal = S.bookings.filter(b => b.kind === "meal" && b.status !== "cancelled").length, cl = S.bookings.filter(b => b.kind === "class" && b.status !== "cancelled").length;
+  return `${mgrHead("Which measures are actually being used?", "Pilot to date (5–20 Oct). Counts of actions and people, never individual scores.")}
+  <div class="grid g3">${Object.values(PILLARS).map(p => { const u = cur[p.key]; return `<div class="card"><div class="row between">${ptag(p.key, p.name)}<span class="xs muted">today +${today[p.key].actions + today[p.key].bookings + today[p.key].applies}</span></div>
+    <div class="row" style="gap:20px"><div class="metric"><span class="v num">${u.people}/${S.employees.length}</span><span class="xs muted">people acting</span></div><div class="metric"><span class="v num">${u.actions + u.bookings + u.applies}</span><span class="xs muted">actions</span></div></div>
+    <p class="xs muted">${p.key === "use_well" ? `${u.applies} energy-led plans applied` : `${u.actions} short actions · ${u.bookings} bookings · ${u.used} confirmed uses`}</p></div>`; }).join("")}</div>
+  <div class="card"><h3>By measure</h3><div class="list">
+    ${mrow(1, `${hm1} breaks`)}${mrow(2, `${meal} meal bookings`)}${mrow(3, `${mv} moves`)}${mrow(4, `${cl} class bookings`)}${mrow(5, `${S.planApplies.length} plans applied`)}${mrow(6, `Policy · ${hm(S.company.core[0])}–${hm(S.company.core[1])}`)}${mrow(7, `${S.employees.filter(e => S.prefs[e.id].start !== 540).length} adjusted start times`)}
+  </div></div>
+  <div class="card"><h3>Weekly loop</h3><div class="list">${weeks.map(([l, d]) => { const w = weeklyLoop(d); return `<div class="li"><span class="tm" style="width:180px">${l}</span><div class="bd"><div class="bar" style="height:12px"><i style="width:${w.n / w.of * 100}%"></i></div></div><b class="num">${w.n}/${w.of}</b></div>`; }).join("")}</div>
+    <p class="xs muted">A complete day has a plan, a check-in inside work hours, at least one action or confirmed booking, and a reflection. Achievers have 3+ complete days. The current week is still in progress.</p></div>`;
+}
+function vResources() {
+  const rs = S.resources;
+  return `${mgrHead("Resources & policies", "Keep supply real. Changes apply to new bookings only; existing bookings keep their snapshot.")}
+  <div class="card"><h3>Today's sessions</h3><div class="tblwrap"><table class="tbl" style="min-width:640px"><tr><th>Session</th><th>Time</th><th>Booked</th><th>Capacity</th><th>Price</th><th></th></tr>
+    ${rs.map(r => { const used = S.bookings.filter(b => b.resId === r.id && ["confirmed", "completed", "no_show"].includes(b.status)).length; return `<tr><td><b>${esc(r.title)}</b><br><span class="xs muted">${r.kind === "meal" ? "Meal" : "Class"} · ${esc(r.provider)}</span></td><td class="num">${hm(r.start)}–${hm(r.end)}</td><td class="num">${used}</td>
+      <td><input type="number" id="cap-${r.id}" min="${used}" value="${r.capacity}" style="width:80px" data-act="cap" data-id="${r.id}" ${r.status !== "published" ? "disabled" : ""} aria-label="Capacity for ${esc(r.title)}"></td>
+      <td>${r.kind === "meal" ? `<input type="number" id="price-${r.id}" min="0" step="0.5" value="${r.price ?? ""}" placeholder="Unknown" style="width:90px" data-act="price" data-id="${r.id}" ${r.status !== "published" ? "disabled" : ""} aria-label="Price for ${esc(r.title)}">` : "Free"}</td>
+      <td>${r.status === "published" ? `<button class="btn danger sm" data-act="cancel-res" data-id="${r.id}">Cancel session</button>` : `<span class="tag bad">Cancelled</span>`}</td></tr>`; }).join("")}
+  </table></div><p class="xs muted">Capacity cannot go below current bookings. Cancelling a session cancels all its confirmed bookings.</p></div>
+  <div class="grid g2">
+    <div class="card"><h3>Canteen subsidy</h3><label class="switch"><input type="checkbox" id="sub-on" data-act="sub-on" ${S.company.subsidy.on ? "checked" : ""}><span>Fixed canteen subsidy</span></label>
+      <label class="f" for="sub-amt">Amount per meal (S$)<input type="number" id="sub-amt" min="0" max="10" step="0.5" value="${S.company.subsidy.amount}" data-act="sub-amt"></label><p class="xs muted">Off by default. Booking never depends on the subsidy.</p></div>
+    <div class="card"><h3>Company recovery allowance policy</h3><label class="f" for="allow">Recovery half-days per person per quarter<select id="allow" data-act="allow">${[0, 1, 2, 3, 4].map(v => `<option ${v === S.company.allowancePerQuarter ? "selected" : ""}>${v}</option>`).join("")}</select></label>
+      <p class="xs muted">Approved automatically within policy. Managers see the schedule, not the reason.</p>
+      <div class="divider"></div><p class="small"><b>Core hours</b> ${hm(S.company.core[0])}–${hm(S.company.core[1])} · <b>Work pattern</b> 3 office + 2 remote · <b>Exercise in work hours</b> ${S.company.exerciseInWork ? "allowed" : "off"}</p><p class="xs faint">Editing core hours is not in this version.</p></div>
+  </div>`;
+}
+
+/* ================= modals ================= */
+function openModal(m) { UI.lastFocus = document.activeElement; UI.modal = m; renderModal(); setTimeout(() => { const f = $("#modal-root [data-autofocus]") || $("#modal-root .modal button, #modal-root .modal input"); f?.focus(); }, 20); }
+function closeModal(force) {
+  if (!force && UI.modal?.dirty) { UI.modal.confirmDiscard = true; renderModal(); return; }
+  UI.modal = null; renderModal(); UI.lastFocus?.focus?.();
+}
+function renderModal() {
+  const root = $("#modal-root"), m = UI.modal;
+  if (!m) { root.innerHTML = ""; return; }
+  const body = ({ checkin: mCheckin, demo: mDemo, book: mBook, review: mReview, rest: mRest, onboard: mOnboard, recheck: mRecheck, exportd: mExport, corrupt: mCorrupt })[m.kind]();
+  root.innerHTML = `<div class="scrim" data-act="scrim"><div class="modal ${m.wide ? "wide" : ""}" role="dialog" aria-modal="true" aria-labelledby="mtitle">${body}
+    ${m.confirmDiscard ? `<div class="card flat" role="alert"><b>Discard what you entered?</b><div class="row"><button class="btn danger sm" data-act="discard">Discard</button><button class="btn ghost sm" data-act="keep">Keep editing</button></div></div>` : ""}</div></div>`;
+}
+const mh = (t, sub, close = true) => `<div class="mh"><div class="stack" style="gap:4px"><h2 id="mtitle">${t}</h2>${sub ? `<p class="small muted">${sub}</p>` : ""}</div>${close ? `<button class="xbtn" data-act="close" aria-label="Close">×</button>` : ""}</div>`;
+function mCheckin() {
+  const m = UI.modal;
+  return `${mh("How is your battery right now?", `${m.source === "quick_recheck" ? "Quick re-check after your activity. " : ""}Your own rating, 1 to 5. Saved at ${hms(CLOCK.sec)}.`)}
+    <div class="rate" role="group" aria-label="Energy rating">${[1, 2, 3, 4, 5].map(i => `<button aria-pressed="${m.rating === i}" data-act="pick-rating" data-v="${i}" ${i === 1 ? "data-autofocus" : ""}>${battery(i, "sm")}<span>${i}</span><span class="xs" style="font-weight:600">${RATING_LABEL[i]}</span></button>`).join("")}</div>
+    <div class="f"><span class="small" style="font-weight:600">What's going on? <span class="muted">(optional)</span></span><div class="seg">${CHECKIN_TAGS.map(t => `<button aria-pressed="${m.tags.includes(t)}" data-act="pick-tag" data-v="${esc(t)}">${esc(t)}</button>`).join("")}</div></div>
+    ${m.error ? `<p class="err" role="alert">${esc(m.error)}</p>` : ""}
+    <div class="row"><button class="btn primary" data-act="save-checkin" ${m.rating ? "" : "disabled"} ${m.busy ? "disabled" : ""}>${m.busy ? "Saving…" : "Save check-in"}</button><span class="xs muted">Completing actions never changes your battery. Only you do.</span></div>`;
+}
+function mRecheck() { return `${mh("Feel any different?", "Optional. A quick check-in records how you feel now as a new entry.")}<div class="row"><button class="btn primary" data-act="checkin" data-src="quick_recheck" data-autofocus>Quick check-in</button><button class="btn ghost" data-act="close">Not now</button></div>`; }
+function mDemo() {
+  const steps = [
+    ["Today · Mei checks in “Low”", "path-today"], ["Protect · Trigger Break nudge", "path-break"], ["Protect · Meal planner", "path-meal"], ["Refuel · Trigger Move timer", "path-move"],
+    ["Refuel · Class booking", "path-class"], ["Use well · Add Deep work and apply", "path-usewell"], ["Report · Action meets energy", "path-report"], ["Manager · Team rhythm and outcomes", "path-manager"],
+  ];
+  const mgr = S.view.role === "manager";
+  return `${mh("Demo controls", "An interactive prototype with fictional data. The demo clock is independent of system time and pauses when the page is in the background.")}
+    <div class="row between"><div class="stack" style="gap:2px"><span class="xs muted">20 October 2026</span><span class="num" style="font-family:var(--f-display);font-weight:800;font-size:34px" id="demo-clock-t">${hms(CLOCK.sec)}:${pad(Math.floor(CLOCK.sec % 60))}</span><span class="xs ${CLOCK.paused ? "muted" : "up"}">${CLOCK.paused ? "Paused" : "Foreground timer active"}</span></div>
+      <div class="row"><button class="btn quiet sm" data-act="clk" data-v="1">+1 min</button><button class="btn quiet sm" data-act="clk" data-v="5">+5 min</button><button class="btn quiet sm" data-act="clk" data-v="30">+30 min</button><button class="btn ghost sm" data-act="clk-pause">${CLOCK.paused ? "Resume" : "Pause"}</button><button class="btn ghost sm" data-act="clk-review">Jump to daily reflection</button></div></div>
+    <div class="grid g2">
+      <label class="f" for="demo-emp">Demo employee<select id="demo-emp" data-act="emp">${S.employees.map(e => `<option value="${e.id}" ${e.id === S.view.emp ? "selected" : ""}>${esc(e.name)} · ${esc(e.team)}</option>`).join("")}</select></label>
+      <div class="f"><span>Trigger now</span><div class="row"><button class="btn primary sm" data-act="trigger" data-type="break_nudge" ${mgr ? "disabled" : ""}>${IC.protect.replace('aria-hidden="true"', 'aria-hidden="true" width="16" height="16"')} Break nudge</button><button class="btn lime sm" data-act="trigger" data-type="move_timer" ${mgr ? "disabled" : ""}>Move timer</button></div></div>
+    </div>
+    <div class="stack" style="gap:8px"><span class="eyebrow">Demo path · 5 minutes, in deck order</span><ol class="pathlist">${steps.map(([l, a]) => `<li><span class="tx">${l}</span><button class="btn ghost sm" data-act="${a}">Go</button></li>`).join("")}</ol></div>
+    <div class="row"><button class="btn primary sm" data-act="role" data-role="${mgr ? "employee" : "manager"}">${mgr ? "Switch to employee view" : "Switch to manager view"}</button><button class="btn ghost sm" data-act="export">Export current demo data</button><button class="btn ghost sm" data-act="failnext">${failNext ? "Next save will fail ✓" : "Simulate next save failure"}</button><button class="btn danger sm" data-act="reset-ask">Reset demo</button></div>
+    ${UI.modal.resetAsk ? `<div class="card flat" role="alert"><b>Reset everything to the seed data?</b><p class="small muted">All bookings, check-ins and settings made in this browser will be replaced.</p><div class="row"><button class="btn danger sm" data-act="reset">Reset</button><button class="btn ghost sm" data-act="reset-no">Keep my data</button></div></div>` : ""}`;
+}
+function mBook() {
+  const r = S.resources.find(x => x.id === UI.modal.id), ev = evalResource(r), m = UI.modal;
+  const alt = !ev.ok ? S.resources.filter(x => x.kind === r.kind && x.id !== r.id).find(x => evalResource(x).ok) : null;
+  return `${mh(`${r.kind === "meal" ? "Reserve" : "Book"} ${esc(r.title)}?`, `${hm(r.start)}–${hm(r.end)} · ${esc(r.location)} · ${esc(r.provider)}`)}
+    <div class="row">${ev.fits.map(f => `<span class="tag ok">✓ ${esc(f)}</span>`).join("")}<span class="tag">${r.price == null ? "Price to be confirmed" : r.price === 0 ? "Free" : "S$" + ev.cost.toFixed(2)}</span><span class="tag num">${ev.left} left</span></div>
+    ${r.note ? `<p class="small muted">${esc(r.note)}</p>` : ""}
+    ${ev.priceUnknown && P().budget != null ? `<label class="switch"><input type="checkbox" id="unk" data-act="unk" ${m.unknownOk ? "checked" : ""}><span>I understand the price is not confirmed and may be above my budget.</span></label>` : ""}
+    <p class="xs muted">Free cancellation until ${hm(r.cancelBy)}. ${r.kind === "meal" ? "Confirm pickup between " + hm(r.start) + " and " + hm(r.end) + "." : "Confirm attendance after the class ends."}</p>
+    ${m.error ? `<p class="err" role="alert">${esc(m.error)}</p>${alt ? `<p class="small">Try <button class="linkbtn" data-act="book" data-id="${alt.id}">${esc(alt.title)} at ${hm(alt.start)}</button> instead.</p>` : ""}` : ""}
+    <div class="row"><button class="btn primary" data-act="confirm-book" data-autofocus ${m.busy || (ev.priceUnknown && P().budget != null && !m.unknownOk) ? "disabled" : ""}>${m.busy ? "Booking…" : "Confirm"}</button><button class="btn ghost" data-act="close">Not now</button></div>`;
+}
+function mReview() {
+  const m = UI.modal, pl = plan();
+  const q = (k, l, hint) => `<div class="f"><span>${l} <span class="muted xs">${hint}</span></span><div class="seg" role="group" aria-label="${esc(l)}">${[1, 2, 3, 4, 5].map(v => `<button aria-pressed="${m.v[k] === v}" data-act="rv" data-k="${k}" data-v="${v}">${v}</button>`).join("")}</div></div>`;
+  return `${mh("End-of-day reflection", `${dayName(TODAY)} · All questions optional · Self-reported, not a performance rating`)}
+    ${q("perf", "How effective was your work today?", "1 low – 5 high")}${q("fatigue", "How tired do you feel?", "1 not at all – 5 very")}${q("health", "How do you feel physically?", "1 poor – 5 great")}${q("wellbeing", "Overall, how was your day?", "1 poor – 5 great")}
+    <label class="f" for="rv-done">Important tasks completed ${pl.target != null ? `(of ${pl.target})` : ""}<input type="number" id="rv-done" min="0" max="${pl.target ?? 20}" value="${m.v.completed ?? ""}" data-bind="modal.v.completed"></label>
+    <label class="f" for="rv-note">Note to self <span class="xs muted">(max 200 characters, never shared)</span><textarea id="rv-note" maxlength="200" data-bind="modal.v.note">${esc(m.v.note || "")}</textarea></label>
+    ${m.error ? `<p class="err" role="alert">${esc(m.error)}</p>` : ""}
+    <div class="row"><button class="btn primary" data-act="save-review" ${m.busy ? "disabled" : ""}>Save reflection</button><span class="xs muted">Saving locks today's target.</span></div>`;
+}
+function mRest() {
+  const m = UI.modal, rs = restState();
+  return `${mh("Take a recovery half-day", `${rs.left} of ${S.company.allowancePerQuarter} company-funded half-days available this quarter. No reason needed.`)}
+    <div class="seg" role="group">${[["PM", "This afternoon (13:30–18:00)"], ["AM", "Tomorrow morning (09:00–13:00)"]].map(([v, l]) => `<button aria-pressed="${m.half === v}" data-act="rest-half" data-v="${v}">${l}</button>`).join("")}</div>
+    <p class="small muted">Approved automatically within policy. Your manager sees "${esc(empName(me()))} · half-day off" on the schedule. They never see why, or your battery.</p>
+    <div class="row"><button class="btn primary" data-act="rest-confirm" ${m.half ? "" : "disabled"}>Confirm half-day</button><button class="btn ghost" data-act="close">Not now</button></div>`;
+}
+function mOnboard() {
+  const m = UI.modal, a = m.a;
+  const q = (k, l, opts) => `<div class="f"><span>${l}</span><div class="seg" role="group" aria-label="${esc(l)}">${opts.map(([v, t]) => `<button aria-pressed="${a[k] === v}" data-act="ob" data-k="${k}" data-v="${v}">${t}</button>`).join("")}</div></div>`;
+  return `<div class="row" style="gap:14px">${LOGO.replace("<svg", '<svg style="width:64px"')}<div class="stack" style="gap:4px"><span class="eyebrow">Meet your energy rhythm</span><h2 id="mtitle">Three questions to start.</h2></div></div>
+    <p class="small muted">This starts a conversation about your preferences. It is not a clinical assessment.</p>
+    ${q("wake", "On a free day, with no alarm, when would you rather wake up?", [["early", "Before 7:00"], ["mid", "7:00–8:30"], ["late", "8:30–10:00"], ["later", "After 10:00"]])}
+    ${q("sharp", "When do you usually feel sharpest at work?", [["morning", "Morning"], ["midday", "Late morning"], ["afternoon", "Afternoon"]])}
+    ${q("nudge", "Break nudge (screen breaks)", [["60", "Every 60 min (recommended)"], ["40", "Every 40 min"], ["0", "Not now"]])}
+    <div class="row"><button class="btn primary" data-act="ob-save" ${a.wake && a.sharp && a.nudge ? "" : "disabled"}>Save my rhythm</button><button class="btn ghost" data-act="ob-skip" data-autofocus>Explore first</button></div>
+    <p class="xs faint">Explore first keeps the defaults: focus window 11:00–13:00, Break nudge every 60 min, Move timer every 30 min. You can change them in Preferences.</p>`;
+}
+function mExport() {
+  const data = JSON.stringify({ note: "Synthetic data for fictional employees. Not real people or health records.", exported_at: `${TODAY}T${hms(CLOCK.sec)}+08:00`, state: S, events: EV, events_truncated: EV_TRUNC }, null, 1);
+  UI.modal.data = data;
+  return `${mh("Export current demo data", `${(data.length / 1024).toFixed(0)} KB of JSON · ${EV.length} local events${EV_TRUNC ? ` (${EV_TRUNC} older events dropped)` : ""}. Synthetic data for fictional employees.`)}
+    <textarea id="export-text" readonly style="min-height:260px;font-family:ui-monospace,Menlo,monospace;font-size:12px">${esc(data)}</textarea>
+    <div class="row"><button class="btn primary" data-act="copy-export">Copy JSON</button><span class="xs muted">Paste into a .json file to keep it.</span></div>`;
+}
+function mCorrupt() {
+  const hasBak = !!lsGet(BAK);
+  return `${mh("Saved demo data can't be read", `Reason: ${esc(corrupt?.why || "unknown")}. Nothing has been overwritten. Choose what to do.`, false)}
+    <textarea readonly style="min-height:120px;font-family:ui-monospace,Menlo,monospace;font-size:12px" id="raw-text">${esc((corrupt?.raw || "").slice(0, 4000))}</textarea>
+    <div class="row"><button class="btn ghost" data-act="copy-raw">Copy raw data</button>${hasBak ? `<button class="btn primary" data-act="restore-bak">Restore last good backup</button>` : ""}<button class="btn danger" data-act="reset">Reset to seed data</button></div>`;
+}
+
+/* ================= activity overlay ================= */
+function activeSession() { const rs = S.reminders[me()]; if (!rs || S.view.role !== "employee") return null; const t = Object.keys(rs).find(k => rs[k].status === "in_progress"); return t ? { type: t, r: rs[t] } : null; }
+function renderActivity() {
+  const root = $("#overlay-root"), a = activeSession();
+  if (!a) { root.innerHTML = ""; document.body.style.overflow = ""; return; }
+  document.body.style.overflow = "hidden";
+  const t = TEMPLATES.find(x => x.id === a.r.templateId), def = REM[a.type];
+  const left = Math.max(0, Math.ceil(a.r.endSec - CLOCK.sec));
+  const alts = candidates(a.type);
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  root.innerHTML = `<div class="activity" role="dialog" aria-modal="true" aria-labelledby="act-title"><div class="in">
+    <span class="ptag ${def.pillar}">${IC[def.pillar]}${PILLARS[def.pillar].short} · ${esc(def.label)}</span>
+    <h1 id="act-title" style="color:#F5F6EC">${esc(t.title)}</h1>
+    <p style="opacity:.85;max-width:44ch">${esc(t.steps)}</p>
+    ${reduce ? "" : `<div id="act-bat">${actBattery(a.r)}</div>`}
+    <div class="count" id="act-count" aria-live="off">${left}</div><span class="sr" aria-live="polite" id="act-sr">${left === 0 ? "Done. You can finish now." : ""}</span>
+    <p class="note">Needs: ${esc(t.needs)} · Source: ${esc(t.source)} · Stop if anything feels uncomfortable.</p>
+    ${alts.length > 1 ? `<div class="alts" role="group" aria-label="Switch activity">${alts.map(x => `<button aria-pressed="${x.id === t.id}" data-act="swap-act" data-id="${x.id}">${esc(x.title)} · ${x.sec}s</button>`).join("")}</div>` : ""}
+    <div class="row" style="justify-content:center"><button class="btn lime" id="act-done" data-act="act-done" ${left > 0 ? "disabled" : ""}>Done</button><button class="btn ghost" style="color:#fff;border-color:rgba(255,255,255,.3)" data-act="act-stop">Stop early</button></div>
+    <p class="note">The battery animation is a visual metaphor. Your battery level changes only when you check in.</p>
+  </div></div>`;
+  if (left > 0 && !UI.actFocused) { UI.actFocused = true; setTimeout(() => $(".activity [data-act='act-stop']")?.focus(), 30); }
+}
+function actBattery(r) {
+  const p = clamp((CLOCK.sec - r.startedSec) / Math.max(1, r.endSec - r.startedSec), 0, 1), on = Math.floor(p * 5);
+  return `<div class="battery md charging" aria-hidden="true"><div class="body">${[0, 1, 2, 3, 4].map(i => `<span class="cell ${i < on ? "on" : i === on ? "next" : ""}"></span>`).join("")}</div><div class="cap"></div></div>`;
+}
+function tickActivity() {
+  const a = activeSession(); if (!a) return;
+  const left = Math.max(0, Math.ceil(a.r.endSec - CLOCK.sec));
+  const c = $("#act-count"); if (c && c.textContent !== String(left)) { c.textContent = left; const b = $("#act-bat"); if (b) b.innerHTML = actBattery(a.r); }
+  const d = $("#act-done"); if (d && left === 0 && d.disabled) { d.disabled = false; $("#act-sr").textContent = "Done. You can finish now."; d.focus(); }
+}
+
+/* ================= commands ================= */
+const ensureEmp = d => { if (d.view.role !== "employee") throw new BizErr("FORBIDDEN", "Switch to employee view."); return d.view.emp; };
+function cmdCheckin(rating, tags, token, source) {
+  return run("checkin", d => {
+    const emp = ensureEmp(d);
+    if (![1, 2, 3, 4, 5].includes(rating)) throw new BizErr("VALIDATION", "Choose a rating from 1 to 5.");
+    const ex = d.energyLogs.find(l => l.token === token);
+    if (ex) { if (ex.emp !== emp || ex.rating !== rating) throw new BizErr("REQUEST_CONFLICT", "This request was already used."); return { dup: true, id: ex.id }; }
+    const id = uid("e"); d.energyLogs.push({ id, emp, date: TODAY, min: Math.floor(CLOCK.sec / 60), rating, tags, source, token }); return { id };
+  });
+}
+function startSession(d, emp, type, templateId) {
+  const r = d.reminders[emp][type], t = TEMPLATES.find(x => x.id === templateId);
+  Object.assign(r, { status: "in_progress", templateId, startedSec: CLOCK.sec, endSec: CLOCK.sec + t.sec });
+}
+function cmdStartActivity(type, src) {
+  const c = candidates(type)[0];
+  if (!c) { toast("No activity fits your settings right now.", "bad"); return; }
+  const other = Object.entries(S.reminders[me()]).find(([k, r]) => k !== type && ["shown", "in_progress"].includes(r.status));
+  if (other) { toast(`Finish or skip the current ${REM[other[0]].label} first.`, "bad"); return; }
+  const res = run("start_activity", d => { const emp = ensureEmp(d); startSession(d, emp, type, c.id); });
+  if (res.ok) { UI.actFocused = false; track("reminder_action", { action: "start", reason_code: src || "manual", reminder_type: type }); if (src === "battery") track("battery_suggestion_clicked", { pillar: REM[type].pillar }); render(); }
+}
+function cmdRem(type, action) {
+  const iv = P().reminders[type] * 60;
+  const res = run("reminder_" + action, d => {
+    const emp = ensureEmp(d), r = d.reminders[emp][type];
+    if (action === "start") { const c = candidates(type)[0]; if (!c) throw new BizErr("NO_ACTIVITY", "No activity fits right now."); startSession(d, emp, type, c.id); }
+    if (action === "later") Object.assign(r, { status: "snoozed", due: CLOCK.sec + 600 });
+    if (action === "skip") Object.assign(r, { status: "scheduled", due: CLOCK.sec + iv, anchor: CLOCK.sec, trigger: null });
+    if (action === "pause") Object.assign(r, { status: "scheduled", pausedToday: true, trigger: null });
+    if (action === "stop") Object.assign(r, { status: "scheduled", due: CLOCK.sec + iv, anchor: CLOCK.sec, templateId: null, endSec: null, trigger: null });
+  });
+  if (res.ok) { UI.actFocused = false; track("reminder_action", { action: action === "stop" ? "skip" : action, reason_code: action === "stop" ? "exited_early" : "user", reminder_type: type }); render(); if (action === "later") toast("OK. We'll check back in 10 minutes."); if (action === "pause") toast(`${REM[type].label} paused until tomorrow.`); }
+  else if (res.message) toast(res.message, "bad");
+}
+function cmdComplete(type) {
+  const emp = me(), r = S.reminders[emp][type];
+  if (r.status !== "in_progress") return;
+  if (CLOCK.sec < r.endSec) { toast("Keep going until the timer reaches zero.", "bad"); return; }
+  const t = TEMPLATES.find(x => x.id === r.templateId), def = REM[type];
+  const canRecheck = !S.recheckAt[emp] || CLOCK.sec - S.recheckAt[emp] >= 7200;
+  const token = r.startedSec + ":" + type;
+  const res = run("complete_activity", d => {
+    const e = ensureEmp(d), rr = d.reminders[e][type];
+    if (rr.status !== "in_progress") throw new BizErr("ALREADY_DONE", "Already logged.");
+    if (d.habits.some(h => h.token === token && h.emp === e)) throw new BizErr("ALREADY_DONE", "Already logged.");
+    d.habits.push({ id: uid("h"), emp: e, date: TODAY, min: Math.floor(CLOCK.sec / 60), pillar: def.pillar, type: t.type, templateId: t.id, title: t.type === "eye_break" ? "Screen break" : t.title, sec: t.sec, token, source: rr.trigger || "manual", snapshot: { title: t.title, steps: t.steps, source: t.source } });
+    Object.assign(rr, { status: "scheduled", due: CLOCK.sec + d.prefs[e].reminders[type] * 60, anchor: CLOCK.sec, templateId: null, endSec: null, trigger: null });
+    if (canRecheck) d.recheckAt[e] = CLOCK.sec;
+  });
+  if (!res.ok) { if (res.message) toast(res.message, "bad"); return; }
+  track("habit_completed", { pillar: def.pillar, activity_type: t.type, template_id: t.id, duration_seconds: t.sec });
+  track("reminder_action", { action: "complete", reason_code: "timer_done", reminder_type: type });
+  UI.actFocused = false;
+  render();
+  toast(`${PILLARS[def.pillar].short} · ${def.logged} logged · ${habitsToday(me(), def.pillar).length} today`, "", true);
+  if (canRecheck) openModal({ kind: "recheck" });
+}
+function cmdTrigger(type) {
+  if (!P().reminders[type]) { toast(`${REM[type].label} is off. Turn it on in ${PILLARS[REM[type].pillar].short} first.`, "bad"); return; }
+  const res = run("trigger_now", d => { const emp = ensureEmp(d), r = d.reminders[emp][type]; if (["shown", "in_progress"].includes(r.status)) throw new BizErr("ACTIVE", "This reminder is already showing."); Object.assign(r, { status: "scheduled", due: CLOCK.sec, trigger: "demo", pausedToday: false }); }, { user: false });
+  if (!res.ok) { toast(res.message || "Could not trigger.", "bad"); return; }
+  syncReminders("demo"); render();
+  const r = S.reminders[me()][type];
+  if (r.status !== "shown") toast(`${REM[type].label} is waiting: ${blockingAt(me(), nowMin()) ? `you're in "${blockingAt(me(), nowMin()).title}". It will show at ${hms(r.due)}.` : Object.values(S.reminders[me()]).some(x => x.status === "shown" || x.status === "in_progress") ? "another reminder is active." : `it will show at ${hms(r.due)}.`}`);
+}
+function cmdBook(id, token, unknownOk) {
+  const r = S.resources.find(x => x.id === id);
+  track("booking_attempted", { resource_type: r.kind, slot_id: id, flow_id: token });
+  const res = run("book", d => {
+    const emp = ensureEmp(d);
+    const ex = d.bookings.find(b => b.token === token);
+    if (ex) { if (ex.emp !== emp || ex.resId !== id) throw new BizErr("REQUEST_CONFLICT", "This request was already used."); return { dup: true }; }
+    const ev = evalResource(d.resources.find(x => x.id === id), emp);
+    if (ev.mine) throw new BizErr("ALREADY_BOOKED", "You already have this booking.");
+    if (!ev.ok) throw new BizErr(ev.reasons[0].code, ev.reasons[0].text);
+    if (ev.priceUnknown && d.prefs[emp].budget != null && !unknownOk) throw new BizErr("PRICE_UNCONFIRMED", "Confirm that you accept an unconfirmed price.");
+    const rr = d.resources.find(x => x.id === id);
+    d.bookings.push({ id: uid("b"), emp, resId: id, date: TODAY, status: "confirmed", kind: rr.kind, pillar: rr.pillar, token, createdSec: CLOCK.sec, snapshot: { title: rr.title, start: rr.start, end: rr.end, price: ev.cost, location: rr.location, policy: { cancelBy: rr.cancelBy, subsidy: d.company.subsidy.on ? d.company.subsidy.amount : 0 } } });
+  });
+  if (res.ok) { track("booking_succeeded", { resource_type: r.kind, slot_id: id, flow_id: token }); closeModal(true); render(); toast(`${r.kind === "meal" ? "Reserved" : "Booked"}: ${r.title} at ${hm(r.start)}. Added to your plan.`); }
+  else { track("booking_failed", { resource_type: r.kind, slot_id: id, error_code: res.code, flow_id: token }); if (UI.modal) { UI.modal.error = res.message || "Not saved. Please try again."; UI.modal.busy = false; renderModal(); } }
+}
+function cmdCancel(bid) {
+  const b = S.bookings.find(x => x.id === bid), r = S.resources.find(x => x.id === b.resId);
+  const res = run("cancel", d => { const emp = ensureEmp(d), bb = d.bookings.find(x => x.id === bid); if (bb.emp !== emp) throw new BizErr("FORBIDDEN", "Not your booking."); if (bb.status !== "confirmed") throw new BizErr("INVALID_STATE", "This booking can't be cancelled."); if (Math.floor(CLOCK.sec / 60) >= r.cancelBy) throw new BizErr("CANCEL_CLOSED", `Cancellation closed at ${hm(r.cancelBy)}.`); bb.status = "cancelled"; bb.cancelledSec = CLOCK.sec; });
+  if (res.ok) { track("booking_cancelled", { resource_type: r.kind, slot_id: r.id, reason_code: "employee" }); render(); toast(`Cancelled ${r.title}. Your place is released.`); } else if (res.message) toast(res.message, "bad");
+}
+function cmdUse(bid) {
+  const b = S.bookings.find(x => x.id === bid), r = S.resources.find(x => x.id === b.resId);
+  const res = run("confirm_use", d => { const bb = d.bookings.find(x => x.id === bid), nm = Math.floor(CLOCK.sec / 60); if (bb.status !== "confirmed") throw new BizErr("INVALID_STATE", "Already confirmed."); if (r.kind === "meal" ? !(nm >= r.start && nm <= r.end) : nm < r.end) throw new BizErr("TOO_EARLY", r.kind === "meal" ? `Pickup opens at ${hm(r.start)}.` : `Confirm after ${hm(r.end)}.`); bb.status = "completed"; bb.usedSec = CLOCK.sec; });
+  if (res.ok) { track("usage_confirmed", { confirmation_method: "self", resource_type: r.kind }); render(); toast(r.kind === "meal" ? "Pickup confirmed." : "Attendance confirmed."); } else if (res.message) toast(res.message, "bad");
+}
+function cmdApplyPlan() {
+  const pv = buildPreview();
+  if (!pv.items.length) return;
+  const res = run("apply_plan", d => {
+    const emp = ensureEmp(d), fresh = buildPreview(emp, d);
+    if (fresh.sig !== pv.sig) throw new BizErr("PREVIEW_STALE", "The preview changed. Review it and apply again.");
+    if (appliedSig(emp) === fresh.sig) return { noop: true };
+    d.blocks = d.blocks.filter(b => !(b.emp === emp && b.date === TODAY && b.kind === "task" && b.system));
+    for (const i of fresh.items.filter(i => i.start != null)) d.blocks.push({ id: uid("k"), emp, date: TODAY, start: i.start, end: i.end, kind: "task", taskId: i.taskId, taskType: i.type, title: i.title, system: true, protected: i.type === "deep", reason: i.reason, pillar: "use_well" });
+    d.planApplies.push({ emp, date: TODAY, sig: fresh.sig });
+  });
+  if (res.ok && !res.noop) { const counts = {}; pv.items.forEach(i => counts[i.type] = (counts[i.type] || 0) + 1); track("energy_plan_applied", { task_type_counts: counts, moved_block_count: pv.moved }); render(); toast("Energy-led plan applied. Meetings, lunch and bookings stayed put.", "", true); }
+  else if (!res.ok && res.message) toast(res.message, "bad");
+}
+function cmdFlexSave(start) {
+  const chk = flexImpact(start);
+  if (chk.error) { toast(chk.error, "bad"); if (chk.locate) go("/refuel", { anchor: chk.locate }); return; }
+  const res = run("flex_save", d => {
+    const emp = ensureEmp(d), pr = d.prefs[emp]; pr.start = start;
+    const pl = d.plans[emp + "|" + TODAY]; pl.start = start; pl.end = start + pr.paidMin + pr.lunchMin;
+    const pv = buildPreview(emp, d);
+    d.blocks = d.blocks.filter(b => !(b.emp === emp && b.date === TODAY && b.kind === "task" && b.system));
+    for (const i of pv.items.filter(i => i.start != null)) d.blocks.push({ id: uid("k"), emp, date: TODAY, start: i.start, end: i.end, kind: "task", taskId: i.taskId, taskType: i.type, title: i.title, system: true, protected: i.type === "deep", reason: i.reason, pillar: "use_well" });
+  });
+  if (res.ok) { UI.flexStart = null; track("flex_start_changed", { changed_keys: ["start"] }); render(); toast(`Workday set to ${hm(start)}–${hm(start + P().paidMin + P().lunchMin)}.`); }
+}
+
+/* ================= event handling ================= */
+const ACT = {
+  nav: el => { if (el.dataset.pillar) track("pillar_entry_clicked", { pillar: el.dataset.pillar }); if (el.dataset.sugg) track("battery_suggestion_clicked", { pillar: el.dataset.sugg }); closeModal(true); go(el.dataset.to, { anchor: el.dataset.anchor }); },
+  demo: () => openModal({ kind: "demo", wide: true }),
+  close: () => closeModal(), scrim: (el, e) => { if (e.target === el && UI.modal?.kind !== "corrupt") closeModal(); },
+  discard: () => closeModal(true), keep: () => { UI.modal.confirmDiscard = false; renderModal(); },
+  checkin: el => { UI.modal = null; openModal({ kind: "checkin", rating: null, tags: [], token: uid("tok"), source: el.dataset.src || "today" }); },
+  "pick-rating": el => { UI.modal.rating = +el.dataset.v; UI.modal.dirty = true; renderModal(); $(`#modal-root [data-act="pick-rating"][data-v="${el.dataset.v}"]`)?.focus(); },
+  "pick-tag": el => { const t = el.dataset.v, a = UI.modal.tags; UI.modal.tags = a.includes(t) ? a.filter(x => x !== t) : [...a, t]; UI.modal.dirty = true; renderModal(); },
+  "save-checkin": () => {
+    const m = UI.modal; if (!m.rating || m.busy) return; m.busy = true; renderModal();
+    const res = cmdCheckin(m.rating, m.tags, m.token, m.source);
+    if (res.ok) { if (!res.dup) track("energy_submitted", { operation: "create", source: m.source }); closeModal(true); render(); const st = batteryState(m.rating); toast(`Battery ${st.cells} of 5 · ${st.label}`, "", false); }
+    else { m.busy = false; m.error = res.message || "Not saved. Please try again."; renderModal(); }
+  },
+  "rem-start": el => { cmdRem(el.dataset.type, "start"); track("reminder_action", { action: "start", reason_code: "banner", reminder_type: el.dataset.type }); },
+  "rem-later": el => cmdRem(el.dataset.type, "later"), "rem-skip": el => cmdRem(el.dataset.type, "skip"), "rem-pause": el => cmdRem(el.dataset.type, "pause"),
+  "start-act": el => cmdStartActivity(el.dataset.type, el.dataset.src),
+  "act-done": () => { const a = activeSession(); if (a) cmdComplete(a.type); },
+  "act-stop": () => { const a = activeSession(); if (a) cmdRem(a.type, "stop"); },
+  "swap-act": el => { const a = activeSession(); if (!a) return; const res = run("swap_activity", d => { startSession(d, ensureEmp(d), a.type, el.dataset.id); }); if (res.ok) { track("reminder_action", { action: "swap", reason_code: "user", reminder_type: a.type }); renderActivity(); } },
+  "rem-toggle": el => { const t = el.dataset.type, on = el.checked; const res = run("settings", d => { const e = ensureEmp(d); d.prefs[e].reminders[t] = on ? (t === "break_nudge" ? 60 : 30) : 0; Object.assign(d.reminders[e][t], { status: "scheduled", due: CLOCK.sec + d.prefs[e].reminders[t] * 60, anchor: CLOCK.sec, pausedToday: false, trigger: null }); }); if (res.ok) track("settings_saved", { changed_keys: ["reminders." + t] }); render(); },
+  "rem-interval": el => { const t = el.dataset.type, v = +el.dataset.v; const res = run("settings", d => { const e = ensureEmp(d); d.prefs[e].reminders[t] = v; const r = d.reminders[e][t]; if (!["shown", "in_progress"].includes(r.status)) Object.assign(r, { status: "scheduled", due: r.anchor + v * 60, pausedToday: false }); }); if (res.ok) track("settings_saved", { changed_keys: ["reminders." + t] }); render(); },
+  trigger: el => { closeModal(true); const t = el.dataset.type; if (S.view.role !== "employee") return; go(PILLARS[REM[t].pillar].route, { keepScroll: false }); cmdTrigger(t); },
+  book: el => { UI.modal = null; openModal({ kind: "book", id: el.dataset.id, token: uid("tok"), unknownOk: false }); },
+  unk: el => { UI.modal.unknownOk = el.checked; renderModal(); },
+  "confirm-book": () => { const m = UI.modal; if (m.busy) return; m.busy = true; renderModal(); cmdBook(m.id, m.token, m.unknownOk); },
+  cancel: el => cmdCancel(el.dataset.id), use: el => cmdUse(el.dataset.id),
+  avail: el => { UI.availOnly = el.checked; render(); },
+  lib: el => { UI.libFilter[el.dataset.k] = el.dataset.v; render(); },
+  illus: el => { UI.showIllustrative = el.checked; render(); },
+  dt: el => { UI.draftTask[el.dataset.k] = el.dataset.k === "dur" ? +el.dataset.v : el.dataset.v; render(); },
+  "rm-task": el => { const res = run("rm_task", d => { const e = ensureEmp(d); d.tasks = d.tasks.filter(t => !(t.id === el.dataset.id && t.emp === e)); }); if (res.ok) { render(); track("energy_plan_previewed", { task_type_counts: {}, moved_block_count: buildPreview().moved }); } },
+  "apply-plan": () => cmdApplyPlan(),
+  "flex-pick": el => { UI.flexStart = +el.value; render(); },
+  "flex-save": () => cmdFlexSave(UI.flexStart), "flex-reset": () => { UI.flexStart = null; render(); },
+  follow: el => { run("settings", d => { d.prefs[ensureEmp(d)].followEnergy = el.checked; }); render(); },
+  rc: (el) => { const rc = UI.rcDraft || { ...S.rhythmCards[me()] }; const k = el.dataset.k; rc[k] = el.tagName === "SELECT" ? el.value : k === "reply" ? +el.dataset.v : el.dataset.v; UI.rcDraft = rc; render(); },
+  "rc-update": () => { const rc = UI.rcDraft || S.rhythmCards[me()]; const res = run("rhythm_card", d => { const e = ensureEmp(d); d.rhythmCards[e] = { ...rc, show: d.rhythmCards[e].show, updated: CLOCK.sec }; }); if (res.ok) { UI.rcDraft = null; render(); toast("Card updated. Review it, then copy."); } },
+  "rc-show": el => { run("rhythm_card", d => { d.rhythmCards[ensureEmp(d)].show = el.checked; }); render(); },
+  "rc-copy": () => { const rc = S.rhythmCards[me()], c = curve(); const txt = `${empName(me())} · Working rhythm\nRhythm: ${rc.rhythm}\nStrongest window: ${c.win ? hm(c.win[0]) + "–" + hm(c.win[1]) : "Not set"}\nBest for deep discussion: ${rc.deepTime}\nI usually reply within ${rc.reply} min\nCore hours: ${hm(S.company.core[0])}–${hm(S.company.core[1])}\nA conversation starter, not a performance promise.`; copyText(txt, () => { track("rhythm_card_exported", { method: "copy" }); toast("Card copied."); }); },
+  swap: () => { UI.swap = !UI.swap; render(); },
+  review: () => { const ex = S.reviews.find(x => x.emp === me() && x.date === TODAY); openModal({ kind: "review", v: ex ? { ...ex } : { perf: null, fatigue: null, health: null, wellbeing: null, completed: null, note: "" }, op: ex ? "update" : "create" }); },
+  rv: el => { const k = el.dataset.k, v = +el.dataset.v; UI.modal.v[k] = UI.modal.v[k] === v ? null : v; UI.modal.dirty = true; renderModal(); },
+  "save-review": () => {
+    const m = UI.modal, v = m.v, pl = plan();
+    const comp = v.completed === "" || v.completed == null ? null : +v.completed;
+    if (comp != null && (!Number.isInteger(comp) || comp < 0 || (pl.target != null && comp > pl.target))) { m.error = `Completed must be between 0 and ${pl.target}.`; renderModal(); return; }
+    const res = run("review", d => { const e = ensureEmp(d), p = d.plans[e + "|" + TODAY]; if (Math.floor(CLOCK.sec / 60) < p.end) throw new BizErr("TOO_EARLY", `Reflection opens at ${hm(p.end)}.`); const row = { emp: e, date: TODAY, perf: v.perf, fatigue: v.fatigue, health: v.health, wellbeing: v.wellbeing, completed: comp, planned: p.target, note: String(v.note || "").slice(0, 200), qv: "daily_v1" }; const i = d.reviews.findIndex(x => x.emp === e && x.date === TODAY); if (i >= 0) d.reviews[i] = row; else d.reviews.push(row); p.locked = true; });
+    if (res.ok) { track("review_submitted", { operation: m.op, questionnaire_version: "daily_v1" }); closeModal(true); render(); toast("Reflection saved. See you tomorrow."); } else { m.error = res.message || "Not saved. Please try again."; renderModal(); }
+  },
+  rest: () => openModal({ kind: "rest", half: null }),
+  "rest-half": el => { UI.modal.half = el.dataset.v; renderModal(); },
+  "rest-confirm": () => { const half = UI.modal.half; const res = run("rest", d => { const e = ensureEmp(d); const used = d.rest.filter(r => r.emp === e && r.status === "approved").length; if (used >= d.company.allowancePerQuarter) throw new BizErr("NO_ALLOWANCE", "No half-days left this quarter."); d.rest.push({ id: uid("r"), emp: e, requestedOn: TODAY, date: half === "PM" ? TODAY : "2026-10-21", half, status: "approved" }); }); if (res.ok) { track("rest_requested", {}); closeModal(true); render(); toast("Approved within policy. Enjoy the rest."); } else toast(res.message || "Not saved.", "bad"); },
+  onboard: () => openModal({ kind: "onboard", a: {} }),
+  ob: el => { UI.modal.a[el.dataset.k] = el.dataset.v; renderModal(); },
+  "ob-save": () => { const a = UI.modal.a; const fw = { morning: [600, 720], midday: [660, 780], afternoon: [840, 960] }[a.sharp]; const res = run("onboarding", d => { const e = ensureEmp(d), p = d.prefs[e]; p.onboarded = true; p.focusWindow = fw; p.reminders.break_nudge = +a.nudge; d.reminders[e].break_nudge.due = d.reminders[e].break_nudge.anchor + (+a.nudge) * 60; d.rhythmCards[e].rhythm = a.wake === "early" ? "Earlier rhythm" : a.wake === "mid" ? "In between" : "Later rhythm"; }); if (res.ok) { track("onboarding_completed", { skipped_optional: false }); closeModal(true); render(); toast("Your rhythm is set. Check in to see your battery."); } },
+  "ob-skip": () => { const res = run("onboarding", d => { d.prefs[ensureEmp(d)].onboarded = true; }); if (res.ok) track("onboarding_completed", { skipped_optional: true }); closeModal(true); render(); },
+  "buddy-opt": el => { run("buddy", d => { d.prefs[ensureEmp(d)].buddyOptIn = el.checked; }); render(); },
+  "buddy-invite": el => { const res = run("buddy", d => { const e = ensureEmp(d); d.buddies.push({ id: uid("bd"), from: e, to: el.dataset.to, type: "move", start: +el.dataset.slot, status: "pending", sentSec: CLOCK.sec }); }); if (res.ok) { track("buddy_invited", {}); render(); toast(`Invite sent to ${empName(el.dataset.to)}.`); } },
+  clk: el => { advance(+el.dataset.v * 60); },
+  "clk-pause": () => { CLOCK.paused = !CLOCK.paused; saveClock(); render(); },
+  "clk-review": () => { const t = plan().end * 60; if (CLOCK.sec < t) advance(t - CLOCK.sec); },
+  emp: el => { const res = run("view", d => { d.view.emp = el.value; }, { user: false }); if (res.ok) { UI.flexStart = null; UI.rcDraft = null; syncReminders(); render(); if (!P().onboarded && S.view.role === "employee") openModal({ kind: "onboard", a: {} }); } },
+  role: el => { const role = el.dataset.role; const res = run("view", d => { d.view.role = role; }, { user: false }); if (res.ok) { closeModal(true); go(role === "manager" ? "/admin/outcomes" : "/today"); } },
+  export: () => { UI.modal = null; openModal({ kind: "exportd", wide: true }); },
+  "copy-export": () => copyText(UI.modal.data, () => toast("JSON copied."), $("#export-text")),
+  failnext: () => { failNext = !failNext; renderModal(); },
+  "reset-ask": () => { UI.modal.resetAsk = true; renderModal(); }, "reset-no": () => { UI.modal.resetAsk = false; renderModal(); },
+  reset: () => { resetDemo(); UI.modal = null; UI.flexStart = null; UI.rcDraft = null; go("/today", { replace: true }); openModal({ kind: "onboard", a: {} }); toast("Demo reset to seed data."); },
+  "copy-raw": () => copyText(corrupt?.raw || "", () => toast("Raw data copied."), $("#raw-text")),
+  "restore-bak": () => { try { const b = validate(JSON.parse(lsGet(BAK))); S = b; persist(S); corrupt = null; readOnly = false; closeModal(true); render(); toast("Backup restored."); } catch (e) { toast("Backup can't be read either: " + e.message, "bad"); } },
+  // demo path
+  "path-today": () => { closeModal(true); go("/today"); setTimeout(() => ACT.checkin({ dataset: {} }), 60); },
+  "path-break": () => ACT.trigger({ dataset: { type: "break_nudge" } }),
+  "path-meal": () => { closeModal(true); go("/protect", { anchor: "meals" }); },
+  "path-move": () => ACT.trigger({ dataset: { type: "move_timer" } }),
+  "path-class": () => { closeModal(true); go("/refuel", { anchor: "classes" }); },
+  "path-usewell": () => { closeModal(true); go("/use-well", { anchor: "plan" }); setTimeout(() => $("#task-title")?.focus(), 400); },
+  "path-report": () => { closeModal(true); go("/report"); },
+  "path-manager": () => ACT.role({ dataset: { role: "manager" } }),
+  // admin
+  cap: el => { const v = +el.value; const res = run("policy", d => { const r = d.resources.find(x => x.id === el.dataset.id); const used = d.bookings.filter(b => b.resId === r.id && ["confirmed", "completed", "no_show"].includes(b.status)).length; if (!Number.isInteger(v) || v < used) throw new BizErr("CAPACITY_BELOW_USED", `Capacity can't go below ${used} current bookings.`); r.capacity = v; }, { role: "manager" }); if (res.ok) { track("policy_saved", { changed_keys: ["capacity"] }); toast("Capacity saved."); } else toast(res.message || "Not saved.", "bad"); render(); },
+  price: el => { const v = el.value === "" ? null : +el.value; const res = run("policy", d => { const r = d.resources.find(x => x.id === el.dataset.id); if (v != null && (isNaN(v) || v < 0)) throw new BizErr("VALIDATION", "Price must be 0 or more."); r.price = v; if (v != null && r.tags == null) r.tags = []; }, { role: "manager" }); if (res.ok) { track("policy_saved", { changed_keys: ["price"] }); toast("Price saved. Existing bookings keep their old price."); } else toast(res.message || "Not saved.", "bad"); render(); },
+  "cancel-res": el => { const res = run("policy", d => { const r = d.resources.find(x => x.id === el.dataset.id); r.status = "cancelled"; d.bookings.filter(b => b.resId === r.id && b.status === "confirmed").forEach(b => { b.status = "cancelled"; b.cancelledBy = "provider"; }); }, { role: "manager" }); if (res.ok) { track("policy_saved", { changed_keys: ["status"] }); render(); toast("Session cancelled. Confirmed bookings were cancelled too."); } },
+  "sub-on": el => { const res = run("policy", d => { d.company.subsidy.on = el.checked; if (el.checked && !d.company.subsidy.amount) d.company.subsidy.amount = 2; }, { role: "manager" }); if (res.ok) track("policy_saved", { changed_keys: ["subsidy.on"] }); render(); },
+  "sub-amt": el => { const v = +el.value; const res = run("policy", d => { if (isNaN(v) || v < 0 || v > 10) throw new BizErr("VALIDATION", "Amount must be between 0 and 10."); d.company.subsidy.amount = v; }, { role: "manager" }); if (res.ok) track("policy_saved", { changed_keys: ["subsidy.amount"] }); else toast(res.message || "Not saved.", "bad"); render(); },
+  allow: el => { const res = run("policy", d => { d.company.allowancePerQuarter = +el.value; }, { role: "manager" }); if (res.ok) { track("policy_saved", { changed_keys: ["allowance"] }); toast("Policy saved."); } render(); },
+};
+function copyText(t, ok, fallbackEl) { try { navigator.clipboard.writeText(t).then(ok, () => { fallbackEl?.select?.(); toast("Select the text and copy it with your keyboard.", "bad"); }); } catch { fallbackEl?.select?.(); toast("Select the text and copy it with your keyboard.", "bad"); } }
+const CHANGE_ACTS = new Set(["rem-toggle", "unk", "avail", "illus", "flex-pick", "follow", "rc-show", "buddy-opt", "emp", "cap", "price", "sub-on", "sub-amt", "allow"]);
+document.addEventListener("click", e => {
+  const el = e.target.closest("[data-act]"); if (!el) return;
+  const a = el.dataset.act;
+  if (CHANGE_ACTS.has(a)) return;
+  if (a === "rc" && el.tagName === "SELECT") return;
+  if (el.tagName === "A") e.preventDefault();
+  if (el.disabled) return;
+  if (a === "scrim") { ACT.scrim(el, e); return; }
+  ACT[a]?.(el, e);
+});
+document.addEventListener("change", e => {
+  const el = e.target.closest("[data-act]"); if (!el) return;
+  const a = el.dataset.act;
+  if (CHANGE_ACTS.has(a) || (a === "rc" && el.tagName === "SELECT")) ACT[a](el, e);
+});
+document.addEventListener("input", e => {
+  const b = e.target.dataset?.bind; if (!b) return;
+  const [root, ...path] = b.split("."); let o = root === "modal" ? UI.modal : UI[root];
+  if (root === "modal") { UI.modal.dirty = true; }
+  const k = path.pop(); for (const p of path) o = o[p]; o[k] = e.target.value;
+});
+document.addEventListener("submit", e => {
+  e.preventDefault();
+  const f = e.target.dataset.form;
+  if (f === "addtask") {
+    const dt = UI.draftTask, title = dt.title.trim();
+    if (!title) { toast("Give the task a short name.", "bad"); $("#task-title")?.focus(); return; }
+    const res = run("add_task", d => { const e2 = ensureEmp(d); const n = d.tasks.filter(t => t.emp === e2 && t.date === TODAY).length; if (n >= 20) throw new BizErr("LIMIT", "Up to 20 tasks a day."); d.tasks.push({ id: uid("task"), emp: e2, date: TODAY, title, type: dt.type, dur: dt.dur, order: Date.now() }); });
+    if (res.ok) { UI.draftTask = { title: "", type: "deep", dur: 45 }; render(); const pv = buildPreview(); const counts = {}; pv.items.forEach(i => counts[i.type] = (counts[i.type] || 0) + 1); track("energy_plan_previewed", { task_type_counts: counts, moved_block_count: pv.moved }); const it = pv.items.find(i => i.title === title); toast(it?.start != null ? `Preview: ${title} at ${hm(it.start)}–${hm(it.end)} · ${it.reason}` : "No available slot today for that task."); }
+    else if (res.message) toast(res.message, "bad");
+  }
+  if (f === "settings") {
+    const fd = new FormData(e.target), errEl = $("#settings-err");
+    const target = fd.get("target") === null ? P().target : fd.get("target") === "" ? null : +fd.get("target");
+    if (target != null && (!Number.isInteger(target) || target < 1 || target > 20)) { errEl.textContent = "Daily target must be a whole number from 1 to 20, or empty."; $("#s-target").focus(); return; }
+    const budget = fd.get("budget") === "" ? null : +fd.get("budget");
+    if (budget != null && (isNaN(budget) || budget < 0)) { errEl.textContent = "Budget must be 0 or more, or empty."; return; }
+    const pos = fd.getAll("pos"); if (!pos.length) { errEl.textContent = "Choose at least one posture."; return; }
+    const res = run("settings", d => { const e2 = ensureEmp(d), p = d.prefs[e2]; const pl = d.plans[e2 + "|" + TODAY];
+      if (!pl.locked) { p.target = target; pl.target = target; }
+      p.focusWindow = String(fd.get("focus")).split(",").map(Number); p.budget = budget; p.softTags = fd.getAll("soft"); p.strictTags = fd.getAll("strict");
+      p.activity = { ...p.activity, positions: pos, space: fd.get("space"), maxSec: +fd.get("max"), avoid: fd.getAll("avoid"), equipment: ["none", ...fd.getAll("eq")] };
+      for (const t of Object.keys(REM)) { const v = +fd.get(t); if (v !== p.reminders[t]) { p.reminders[t] = v; Object.assign(d.reminders[e2][t], { status: "scheduled", due: CLOCK.sec + v * 60, anchor: CLOCK.sec, pausedToday: false }); } } });
+    if (res.ok) { errEl.textContent = ""; track("settings_saved", { changed_keys: ["target", "focus", "budget", "tags", "activity", "reminders"] }); render(); toast("Preferences saved."); }
+  }
+});
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape") { if (UI.modal && UI.modal.kind !== "corrupt") { closeModal(); e.preventDefault(); } }
+  if (e.key === "Tab" && (UI.modal || activeSession())) {
+    const root = UI.modal ? $("#modal-root .modal") : $(".activity"); if (!root) return;
+    const f = [...root.querySelectorAll("button:not([disabled]),input:not([disabled]),select,textarea,a[href]")]; if (!f.length) return;
+    if (e.shiftKey && document.activeElement === f[0]) { f[f.length - 1].focus(); e.preventDefault(); }
+    else if (!e.shiftKey && document.activeElement === f[f.length - 1]) { f[0].focus(); e.preventDefault(); }
+  }
+});
+window.addEventListener("popstate", () => { const r = readRoute(); if (r) { UI.route = r; render(); } });
+window.addEventListener("storage", e => {
+  if (e.key !== KEY) return;
+  readOnly = true;
+  if (!$(".readonly-bar")) { const b = document.createElement("div"); b.className = "readonly-bar"; b.innerHTML = `This demo changed in another tab. View only until you reload. <button class="btn primary sm" onclick="location.reload()">Reload</button>`; document.body.appendChild(b); }
+});
+
+/* ================= clock ================= */
+function advance(sec) {
+  CLOCK.sec = Math.min(CLOCK.sec + sec, 86399); saveClock();
+  syncReminders(); render();
+  if (UI.modal?.kind === "demo") { const t = $("#demo-clock-t"); if (t) t.textContent = `${hms(CLOCK.sec)}:${pad(Math.floor(CLOCK.sec % 60))}`; }
+}
+let lastT = performance.now(), lastSync = 0, lastSave = 0, lastMin = -1;
+function loop(t) {
+  const dt = (t - lastT) / 1000; lastT = t;
+  if (!CLOCK.paused && document.visibilityState === "visible" && dt < 2 && S) {
+    CLOCK.sec = Math.min(CLOCK.sec + dt, 86399);
+    const ct = $("#clock-t"); if (ct) ct.textContent = hms(CLOCK.sec);
+    const dc = $("#demo-clock-t"); if (dc) dc.textContent = `${hms(CLOCK.sec)}:${pad(Math.floor(CLOCK.sec % 60))}`;
+    tickActivity();
+    if (CLOCK.sec - lastSync >= 15) { lastSync = CLOCK.sec; syncReminders(); }
+    if (t - lastSave > 5000) { lastSave = t; saveClock(); }
+    const m = Math.floor(CLOCK.sec / 60);
+    if (m !== lastMin) { lastMin = m; if (lastMin >= 0 && !UI.modal && !activeSession() && !document.activeElement?.matches?.("input,select,textarea")) renderMain(); }
+  }
+  requestAnimationFrame(loop);
+}
+document.addEventListener("visibilitychange", () => { lastT = performance.now(); if (document.visibilityState !== "visible") saveClock(); });
+
+/* ================= boot ================= */
+function boot() {
+  loadAll();
+  const r = readRoute();
+  UI.route = r || (S.view.role === "manager" ? "/admin/outcomes" : "/today");
+  if (UI.route.startsWith("/admin") !== (S.view.role === "manager")) UI.route = S.view.role === "manager" ? "/admin/outcomes" : "/today";
+  lastSync = CLOCK.sec; lastMin = Math.floor(CLOCK.sec / 60);
+  render();
+  track("page_view", { route_id: UI.route });
+  if (corrupt) openModal({ kind: "corrupt" });
+  else if (S.view.role === "employee" && !P().onboarded) openModal({ kind: "onboard", a: {} });
+  syncReminders();
+  requestAnimationFrame(loop);
+}
+boot();
+
+</script>
+
+</body>
+</html>
